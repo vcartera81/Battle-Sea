@@ -1,0 +1,129 @@
+﻿<html>
+<head>
+    <title>Sea Battle</title>
+    <style type="text/css">
+        body, html {
+            padding: 0;
+            margin: 0;
+        }
+
+        .battle {
+            overflow: hidden;
+        }
+
+        .section {
+            width: 50%;
+            height: 500px;
+            float: left;
+        }
+
+        .battlefield-cell {
+            position: absolute;
+            background-color: #eee;
+            border: 1px solid #fff;
+        }
+
+        .droppable-ship {
+            margin: 10px;
+            border: 1px solid #ccc;
+        }
+
+        .battlefield-cell-ship-hover {
+            background-color: #aaa;
+        }
+    </style>
+    <script src="https://ajax.googleapis.com/ajax/libs/jquery/1.11.3/jquery.min.js"></script>
+    <link rel="stylesheet" href="https://ajax.googleapis.com/ajax/libs/jqueryui/1.11.4/themes/smoothness/jquery-ui.css">
+    <script src="https://ajax.googleapis.com/ajax/libs/jqueryui/1.11.4/jquery-ui.min.js"></script>
+</head>
+<body>
+    <div class="battle">
+        <div class="section" id="mine">
+
+        </div>
+        <div class="section" id="theirs">
+
+        </div>
+    </div>
+    <div id="shipsArea">
+
+    </div>
+    <script type="text/javascript">
+        var battleField;
+        var columnsArray = "ABCDEFGHIJKLMNOPQRSTUVWXYZ";
+        var deckSize = 50;
+
+        $(document).ready(function () {
+            $.ajax({
+                type: "POST",
+                url: "@Url.Action("GetCurrentBattlefield")",
+                data: {},
+                dataType: "json",
+                contentType: "application/json; charset=utf-8",
+                success: function (response) {
+                    battleField = response.Field;
+                    renderField($("#mine"), response.Field);
+                }
+            });
+
+            $.ajax({
+                type: "POST",
+                url: "@Url.Action("GetDefaultShips")",
+                data: {},
+                dataType: "json",
+                contentType: "application/json; charset=utf-8",
+                success: function (response) {
+                    renderShips($("#shipsArea"), response);
+                }
+            });
+        });
+
+        var renderField = function (wrapper, data) {
+            var cellWidth = $(wrapper).width() / data.length;
+            var cellHeight = $(wrapper).height() / data.length;
+
+            $.each(data, function (rowIndex, row) {
+                $.each(row, function (columnIndex, cellValue) {
+                    var cell = document.createElement("div");
+                    $(cell).css({
+                        "height": cellHeight,
+                        "width": cellWidth,
+                        "left": columnIndex * cellWidth,
+                        "top": rowIndex * cellHeight
+                    }).attr({
+                        "class": "battlefield-cell",
+                        "data-value": cellValue,
+                        "data-row": rowIndex,
+                        "data-column": columnsArray[columnIndex]
+                    }).droppable({
+                        accept: ".droppable-ship",
+                        tolerance: "touch",
+                        greeddy: true
+                    });
+
+                    $(wrapper).append(cell);
+                });
+            });
+        }
+
+        var renderShips = function (wrapper, data) {
+            $.each(data, function(index, ship) {
+                var shipDiv = document.createElement("div");
+                $(shipDiv).attr({
+                    "data-deck-size": ship.Type,
+                    "class": "droppable-ship"
+                }).css({
+                    "height": deckSize,
+                    "width": deckSize * ship.Type
+                }).draggable({
+                    revert: "invalid",
+                    snap: true,
+                    snapTolerance: 20
+                });
+
+                $(wrapper).append(shipDiv);
+            });
+        }
+    </script>
+</body>
+</html>
