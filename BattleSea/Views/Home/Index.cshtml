@@ -65,6 +65,16 @@
                 color: white;
                 border: none;
             }
+
+        .whom-label {
+            position: absolute;
+            top: 5px;
+            display: block;
+            width: 100%;
+            text-align: center;
+            font-weight: 900;
+            font-size: 25px;
+        }
     </style>
     <link href="https://fonts.googleapis.com/css?family=Roboto:400,500,400italic,500italic,700italic,700,900,900italic,300italic,300,100italic,100" rel="stylesheet" type="text/css">
     <script src="https://ajax.googleapis.com/ajax/libs/jquery/1.11.3/jquery.min.js"></script>
@@ -74,17 +84,18 @@
 <body>
     <div class="battle">
         <div class="section" id="mine">
+            <span class="whom-label">You</span>
             <div class="fieldArea">
 
             </div>
-            <span onclick="getBattlefieldAndRender()" class="span-button" style="position: absolute; bottom: 0; margin-left: 40%;">Reposition</span>
+            <span onclick="shuffleShips()" class="span-button" style="position: absolute; bottom: 0; margin-left: 40%;">Reposition</span>
         </div>
         <div class="section" id="theirs">
+            <span class="whom-label">Opponent</span>
+            <div class="fieldArea">
 
+            </div>
         </div>
-    </div>
-    <div id="shipsArea">
-
     </div>
     <script type="text/javascript">
         var battleField;
@@ -99,11 +110,25 @@
                 dataType: "json",
                 contentType: "application/json; charset=utf-8",
                 success: function (response) {
-                    battleField = response.Field;
-                    renderField($("#mine .fieldArea"), response.Field);
+                    $("#mine .fieldArea").empty();
+                    $("#theirs .fieldArea").empty();
+                    renderField($("#mine .fieldArea"), response.FirstPlayer.BattleField.Field.Field);
+                    renderField($("#theirs .fieldArea"), response.SecondPlayer.BattleField.Field.Field);
                 }
             });
         };
+
+        var shuffleShips = function () {
+            $.ajax({
+                type: "POST",
+                url: "@Url.Action("ShuffleShips")",
+                data: {},
+                contentType: "application/json; charset=utf-8",
+                success: function (d) {
+                    getBattlefieldAndRender();
+                }
+            });
+        }
 
         $(document).ready(function () {
             getBattlefieldAndRender();

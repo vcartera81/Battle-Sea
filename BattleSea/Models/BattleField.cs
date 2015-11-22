@@ -7,21 +7,27 @@ namespace BattleSea.Models
 {
     public class BattleField
     {
-        private readonly BattleFieldCells _field;
         private readonly Random _random = new Random();
+        private int _size;
+
+        public BattleFieldCells Field { get; private set; }
 
         public IEnumerable<Ship> Ships { get; set; }
 
         public BattleField(int size)
         {
-            _field = new BattleFieldCells(size);
+            _size = size;
+            Field = new BattleFieldCells(size);
         }
 
         public BattleFieldCells PlaceShipsRandomly()
         {
+            //wipe cells
+            Field = new BattleFieldCells(_size);
+
             foreach (var ship in _shipsDefaultCollection)
             {
-                var cellsCollection = _field.AsCollection().Where(c => !_field.ProximityCheck(c.Coordinate) && c.State != CellState.ShipDeck).ToList();
+                var cellsCollection = Field.AsCollection().Where(c => !Field.ProximityCheck(c.Coordinate) && c.State != CellState.ShipDeck).ToList();
                 if (!cellsCollection.Any()) break;
 
                 Func<Coordinate> getRandomCoordinate = () => cellsCollection[_random.Next(cellsCollection.Count() - 1)].Coordinate;
@@ -34,7 +40,7 @@ namespace BattleSea.Models
                 }
             }
 
-            return _field;
+            return Field;
         }
 
         private bool PlaceShip(Ship ship)
@@ -44,15 +50,14 @@ namespace BattleSea.Models
 
             for (var i = 0; i < decks; i++)
             {
-
                 //try to validate
-                if (_field.ValidateCoordinate(ship.StartingPoint))
+                if (Field.ValidateCoordinate(ship.StartingPoint))
                 {
                     //if there's already a ship on selected coordinate - invalidate ship position
-                    if (_field[ship.StartingPoint] == CellState.ShipDeck) return false;
+                    if (Field[ship.StartingPoint] == CellState.ShipDeck) return false;
 
                     //proximity check
-                    if (_field.ProximityCheck(ship.StartingPoint)) return false;
+                    if (Field.ProximityCheck(ship.StartingPoint)) return false;
 
                     possibleCoordinates[i] = Coordinate.Copy(ship.StartingPoint);
 
@@ -66,7 +71,7 @@ namespace BattleSea.Models
             }
 
             //if everything went fine, persist possibleCoordinates on map
-            possibleCoordinates.ForEach(c => _field[c] = CellState.ShipDeck);
+            possibleCoordinates.ForEach(c => Field[c] = CellState.ShipDeck);
             return true;
         }
 
