@@ -1,10 +1,13 @@
-﻿<html>
+﻿@using BattleSea.Models
+<html>
 <head>
     <title>Sea Battle</title>
     <style type="text/css">
         body, html {
             padding: 0;
             margin: 0;
+            color: #595959;
+            font-family: Roboto;
         }
 
         .battle {
@@ -15,6 +18,8 @@
             width: 50%;
             height: 500px;
             float: left;
+            overflow: hidden;
+            position: relative;
         }
 
         .battlefield-cell {
@@ -23,15 +28,45 @@
             border: 1px solid #fff;
         }
 
-        .droppable-ship {
-            margin: 10px;
-            border: 1px solid #ccc;
+            .battlefield-cell[data-value='1'] {
+                background-color: #2e9f76;
+            }
+
+        /*#mine {
+            padding: 20px;
+        }*/
+
+        .fieldArea {
+            width: 100%;
+            height: 100%;
+            padding: 40px;
+            position: absolute;
+            overflow: hidden;
+            box-sizing: border-box;
         }
 
-        .battlefield-cell-ship-hover {
-            background-color: #aaa;
+        .span-button {
+            -webkit-touch-callout: none;
+            -webkit-user-select: none;
+            -khtml-user-select: none;
+            -moz-user-select: none;
+            -ms-user-select: none;
+            user-select: none;
+            cursor: pointer;
+            display: block;
+            border: 1px solid #cccccc;
+            padding: 6px;
+            border-radius: 4px;
+            font-weight: 500;
         }
+
+            .span-button:hover {
+                background-color: #ccc;
+                color: white;
+                border: none;
+            }
     </style>
+    <link href="https://fonts.googleapis.com/css?family=Roboto:400,500,400italic,500italic,700italic,700,900,900italic,300italic,300,100italic,100" rel="stylesheet" type="text/css">
     <script src="https://ajax.googleapis.com/ajax/libs/jquery/1.11.3/jquery.min.js"></script>
     <link rel="stylesheet" href="https://ajax.googleapis.com/ajax/libs/jqueryui/1.11.4/themes/smoothness/jquery-ui.css">
     <script src="https://ajax.googleapis.com/ajax/libs/jqueryui/1.11.4/jquery-ui.min.js"></script>
@@ -39,7 +74,10 @@
 <body>
     <div class="battle">
         <div class="section" id="mine">
+            <div class="fieldArea">
 
+            </div>
+            <span onclick="getBattlefieldAndRender()" class="span-button" style="position: absolute; bottom: 0; margin-left: 40%;">Reposition</span>
         </div>
         <div class="section" id="theirs">
 
@@ -53,7 +91,7 @@
         var columnsArray = "ABCDEFGHIJKLMNOPQRSTUVWXYZ";
         var deckSize = 50;
 
-        $(document).ready(function () {
+        var getBattlefieldAndRender = function () {
             $.ajax({
                 type: "POST",
                 url: "@Url.Action("GetCurrentBattlefield")",
@@ -62,20 +100,13 @@
                 contentType: "application/json; charset=utf-8",
                 success: function (response) {
                     battleField = response.Field;
-                    renderField($("#mine"), response.Field);
+                    renderField($("#mine .fieldArea"), response.Field);
                 }
             });
+        };
 
-            $.ajax({
-                type: "POST",
-                url: "@Url.Action("GetDefaultShips")",
-                data: {},
-                dataType: "json",
-                contentType: "application/json; charset=utf-8",
-                success: function (response) {
-                    renderShips($("#shipsArea"), response);
-                }
-            });
+        $(document).ready(function () {
+            getBattlefieldAndRender();
         });
 
         var renderField = function (wrapper, data) {
@@ -88,17 +119,13 @@
                     $(cell).css({
                         "height": cellHeight,
                         "width": cellWidth,
-                        "left": columnIndex * cellWidth,
-                        "top": rowIndex * cellHeight
+                        "margin-left": columnIndex * cellWidth,
+                        "margin-top": rowIndex * cellHeight
                     }).attr({
                         "class": "battlefield-cell",
                         "data-value": cellValue,
                         "data-row": rowIndex,
                         "data-column": columnsArray[columnIndex]
-                    }).droppable({
-                        accept: ".droppable-ship",
-                        tolerance: "touch",
-                        greeddy: true
                     });
 
                     $(wrapper).append(cell);
@@ -106,24 +133,24 @@
             });
         }
 
-        var renderShips = function (wrapper, data) {
-            $.each(data, function(index, ship) {
-                var shipDiv = document.createElement("div");
-                $(shipDiv).attr({
-                    "data-deck-size": ship.Type,
-                    "class": "droppable-ship"
-                }).css({
-                    "height": deckSize,
-                    "width": deckSize * ship.Type
-                }).draggable({
-                    revert: "invalid",
-                    snap: true,
-                    snapTolerance: 20
-                });
+        //var renderShips = function (wrapper, data) {
+        //    $.each(data, function(index, ship) {
+        //        var shipDiv = document.createElement("div");
+        //        $(shipDiv).attr({
+        //            "data-deck-size": ship.Type,
+        //            "class": "droppable-ship"
+        //        }).css({
+        //            "height": deckSize,
+        //            "width": deckSize * ship.Type
+        //        }).draggable({
+        //            revert: "invalid",
+        //            snap: true,
+        //            snapTolerance: 20
+        //        });
 
-                $(wrapper).append(shipDiv);
-            });
-        }
+        //        $(wrapper).append(shipDiv);
+        //    });
+        //}
     </script>
 </body>
 </html>

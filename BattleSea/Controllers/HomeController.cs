@@ -6,7 +6,7 @@ namespace BattleSea.Controllers
 {
     public class HomeController : Controller
     {
-        private static readonly BattleField BattleField = new BattleField(8);
+        private readonly BattleField _battleField = new BattleField(10);
 
         public ActionResult Index()
         {
@@ -16,12 +16,7 @@ namespace BattleSea.Controllers
 
         public JsonResult GetCurrentBattlefield()
         {
-            return Json(BattleField.Cells);
-        }
-
-        public JsonResult GetDefaultShips()
-        {
-            return Json(BattleField.GetDefaultShips());
+            return Json(_battleField.PlaceShipsRandomly());
         }
     }
 }
