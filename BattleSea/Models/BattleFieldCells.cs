@@ -66,7 +66,7 @@ namespace BattleSea.Models
             return checker(coordinate.IncreaseRow()) || checker(coordinate.IncreaseRow());
         }
 
-        public IReadOnlyList<Cell> AsCollection()
+        public IReadOnlyList<Cell> AsSingleCollection()
         {
             var collection = new List<Cell>(_size * _size);
             for (var i = 0; i < _size; i++)

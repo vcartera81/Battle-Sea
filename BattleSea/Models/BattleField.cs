@@ -27,7 +27,7 @@ namespace BattleSea.Models
 
             foreach (var ship in _shipsDefaultCollection)
             {
-                var cellsCollection = Field.AsCollection().Where(c => !Field.ProximityCheck(c.Coordinate) && c.State != CellState.ShipDeck).ToList();
+                var cellsCollection = Field.AsSingleCollection().Where(c => !Field.ProximityCheck(c.Coordinate) && c.State != CellState.ShipDeck).ToList();
                 if (!cellsCollection.Any()) break;
 
                 Func<Coordinate> getRandomCoordinate = () => cellsCollection[_random.Next(cellsCollection.Count() - 1)].Coordinate;

@@ -25,7 +25,7 @@ namespace BattleSea.Models
             get
             {
                 //hide battlefield ships for second user
-                var allCells = SecondPlayer.BattleField.Field.AsCollection();
+                var allCells = SecondPlayer.BattleField.Field.AsSingleCollection();
                 var censoredBattleField = new BattleField(_fieldSize);
                 allCells.ForEach(c => censoredBattleField.Field[c.Coordinate] = c.State == CellState.ShipDeck ? CellState.Empty : c.State);
                 return new Player(_fieldSize)
