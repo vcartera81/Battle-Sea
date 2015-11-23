@@ -8,7 +8,7 @@ namespace BattleSea.Models
     public class BattleField
     {
         private readonly Random _random = new Random();
-        private int _size;
+        private readonly int _size;
 
         public BattleFieldCells Field { get; private set; }
 

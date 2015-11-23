@@ -112,8 +112,8 @@
                 success: function (response) {
                     $("#mine .fieldArea").empty();
                     $("#theirs .fieldArea").empty();
-                    renderField($("#mine .fieldArea"), response.FirstPlayer.BattleField.Field.Field);
-                    renderField($("#theirs .fieldArea"), response.SecondPlayer.BattleField.Field.Field);
+                    renderField($("#mine .fieldArea"), response.FirstPlayer.BattleField.Field.Cells);
+                    renderField($("#theirs .fieldArea"), response.SecondPlayerHiddenShips.BattleField.Field.Cells);
                 }
             });
         };

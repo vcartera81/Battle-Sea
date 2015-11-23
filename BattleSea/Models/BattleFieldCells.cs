@@ -8,7 +8,7 @@ namespace BattleSea.Models
         private readonly int _size;
         private IList<IList<CellState>> _matrix;
 
-        public IEnumerable<IEnumerable<CellState>> Field => _matrix;
+        public IEnumerable<IEnumerable<CellState>> Cells => _matrix;
 
         public CellState this[Coordinate coord]
         {
