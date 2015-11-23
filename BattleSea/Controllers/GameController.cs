@@ -11,11 +11,13 @@ namespace BattleSea.Controllers
             return View();
         }
 
+        [HttpPost]
         public JsonResult GetCurrentBattlefield()
         {
             return Json(Game);
         }
 
+        [HttpPost]
         public void ShuffleShips()
         {
             if (!Game.Started)
