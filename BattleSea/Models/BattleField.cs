@@ -1,14 +1,21 @@
 ﻿using System;
 using System.Collections.Generic;
 using System.Linq;
+using BattleSea.Models.Exceptions;
 using WebGrease.Css.Extensions;
 
 namespace BattleSea.Models
 {
     public class BattleField
     {
+        #region FIELDS
+
         private readonly Random _random = new Random();
         private readonly int _size;
+
+        #endregion
+
+        #region PUBLIC
 
         public BattleFieldCells Field { get; private set; }
 
@@ -42,6 +49,31 @@ namespace BattleSea.Models
 
             return Field;
         }
+
+        public CellState Fire(Coordinate coordinate)
+        {
+            switch (Field[coordinate])
+            {
+                case CellState.ShipDeck:
+                    Field[coordinate] = CellState.Exploded;
+                    break;
+                case CellState.Empty:
+                    Field[coordinate] = CellState.Shot;
+                    break;
+                case CellState.Exploded:
+                    throw new InvalidShotException("Cannot shot again an exploded cell.");
+                case CellState.Shot:
+                    throw new InvalidShotException("This cell were already shot.");
+                default:
+                    throw new ArgumentOutOfRangeException();
+            }
+
+            return Field[coordinate];
+        }
+
+        #endregion
+
+        #region PRIVATE
 
         private bool PlaceShip(Ship ship)
         {
@@ -77,18 +109,9 @@ namespace BattleSea.Models
 
         private readonly IEnumerable<Ship> _shipsDefaultCollection = new List<Ship>
         {
-            new Ship(Type.FourDeck),
-            new Ship(Type.FourDeck),
-            new Ship(Type.ThreeDeck),
-            new Ship(Type.ThreeDeck),
-            new Ship(Type.ThreeDeck),
-            new Ship(Type.TwoDeck),
-            new Ship(Type.TwoDeck),
-            new Ship(Type.TwoDeck),
-            new Ship(Type.OneDeck),
-            new Ship(Type.OneDeck),
-            new Ship(Type.OneDeck),
-            new Ship(Type.OneDeck)
+            new Ship(Type.FourDeck), new Ship(Type.FourDeck), new Ship(Type.ThreeDeck), new Ship(Type.ThreeDeck), new Ship(Type.ThreeDeck), new Ship(Type.TwoDeck), new Ship(Type.TwoDeck), new Ship(Type.TwoDeck), new Ship(Type.OneDeck), new Ship(Type.OneDeck), new Ship(Type.OneDeck), new Ship(Type.OneDeck)
         };
+
+        #endregion
     }
 }

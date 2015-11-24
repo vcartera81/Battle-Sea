@@ -12,6 +12,10 @@ namespace BattleSea.Models
             Row = row;
         }
 
+        public Coordinate ()
+        {
+        }
+
         public char Column
         {
             get { return char.ToUpper(_column); }

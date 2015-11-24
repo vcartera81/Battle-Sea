@@ -1,4 +1,5 @@
 ﻿@using BattleSea.Models
+@model Game
 <html>
 <head>
     <title>Sea Battle</title>
@@ -28,8 +29,19 @@
             border: 1px solid #fff;
         }
 
+            /* Ship Deck */
             .battlefield-cell[data-value='1'] {
                 background-color: #2e9f76;
+            }
+
+            /* Shot */
+            .battlefield-cell[data-value='2'] {
+                background-color: #5b6461;
+            }
+
+            /* Exploded */
+            .battlefield-cell[data-value='3'] {
+                background-color: #e15969;
             }
 
         /*#mine {
@@ -75,6 +87,14 @@
             font-weight: 900;
             font-size: 25px;
         }
+
+        .cell-selectable {
+            cursor: pointer;
+        }
+
+            .cell-selectable:hover {
+                opacity: 0.6;
+            }
     </style>
     <link href="https://fonts.googleapis.com/css?family=Roboto:400,500,400italic,500italic,700italic,700,900,900italic,300italic,300,100italic,100" rel="stylesheet" type="text/css">
     <script src="https://ajax.googleapis.com/ajax/libs/jquery/1.11.3/jquery.min.js"></script>
@@ -88,7 +108,10 @@
             <div class="fieldArea">
 
             </div>
-            <span onclick="shuffleShips()" class="span-button" style="position: absolute; bottom: 0; margin-left: 40%;">Reposition</span>
+            @if (Model.State == GameState.Initialized)
+            {
+                <span id="shuffleBtn" onclick="shuffleShips()" class="span-button" style="position: absolute; bottom: 0; margin-left: 40%;">Reposition</span>
+            }
         </div>
         <div class="section" id="theirs">
             <span class="whom-label">Opponent</span>
@@ -97,6 +120,11 @@
             </div>
         </div>
     </div>
+    @if (Model.State == GameState.Initialized)
+    {
+        <span id="startGameBtn" class="span-button" onclick="startGame()" style="display: inline-block; margin-left: 49%; position: absolute;">Start game!</span>
+    }
+
     <script type="text/javascript">
         var battleField;
         var columnsArray = "ABCDEFGHIJKLMNOPQRSTUVWXYZ";
@@ -114,6 +142,11 @@
                     $("#theirs .fieldArea").empty();
                     renderField($("#mine .fieldArea"), response.FirstPlayer.BattleField.Field.Cells);
                     renderField($("#theirs .fieldArea"), response.SecondPlayerHiddenShips.BattleField.Field.Cells);
+
+                    @if (Model.State == GameState.Started)
+                    {
+                        <text>activateCells();</text>
+                    }
                 }
             });
         };
@@ -123,9 +156,21 @@
                 type: "POST",
                 url: "@Url.Action("ShuffleShips")",
                 data: {},
-                contentType: "application/json; charset=utf-8",
                 success: function (d) {
                     getBattlefieldAndRender();
+                }
+            });
+        }
+
+        var startGame = function () {
+            $.ajax({
+                type: "POST",
+                url: "@Url.Action("Start")",
+                data: {},
+                success: function (d) {
+                    $("#startGameBtn").remove();
+                    $("#shuffleBtn").remove();
+                    activateCells();
                 }
             });
         }
@@ -155,6 +200,35 @@
 
                     $(wrapper).append(cell);
                 });
+            });
+        }
+
+        var activateCells = function () {
+            //set cells selectable
+            $("#theirs .battlefield-cell").each(function () {
+                $(this).addClass("cell-selectable");
+            });
+
+            $("#theirs .battlefield-cell").click(function () {
+                //fire
+                var that = $(this);
+                if ($(this).attr("data-value") == "0") {
+                    $.ajax({
+                        type: "POST",
+                        url: "@Url.Action("Fire")",
+                        data: JSON.stringify({
+                            coordinate: {
+                                Column: $(this).attr("data-column"),
+                                Row: $(this).attr("data-row")
+                            }
+                        }),
+                        dataType: "json",
+                        contentType: "application/json; charset=utf-8",
+                        success: function (response) {
+                            $(that).attr("data-value", response);
+                        }
+                    });
+                }
             });
         }
 

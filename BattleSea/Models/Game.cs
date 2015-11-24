@@ -35,6 +35,14 @@ namespace BattleSea.Models
             }
         }
 
-        public bool Started { get; set; }
+        public GameState State { get; private set; }
+
+        public void Start()
+        {
+            if (State == GameState.Initialized)
+                State = GameState.Started;
+            else
+                throw new InvalidOperationException($"Cannot start the Game when it's state is {State}.");
+        }
     }
 }
