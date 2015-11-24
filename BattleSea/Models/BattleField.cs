@@ -109,7 +109,18 @@ namespace BattleSea.Models
 
         private readonly IEnumerable<Ship> _shipsDefaultCollection = new List<Ship>
         {
-            new Ship(Type.FourDeck), new Ship(Type.FourDeck), new Ship(Type.ThreeDeck), new Ship(Type.ThreeDeck), new Ship(Type.ThreeDeck), new Ship(Type.TwoDeck), new Ship(Type.TwoDeck), new Ship(Type.TwoDeck), new Ship(Type.OneDeck), new Ship(Type.OneDeck), new Ship(Type.OneDeck), new Ship(Type.OneDeck)
+            new Ship(Type.FourDeck),
+            new Ship(Type.FourDeck),
+            new Ship(Type.ThreeDeck),
+            new Ship(Type.ThreeDeck),
+            new Ship(Type.ThreeDeck),
+            new Ship(Type.TwoDeck),
+            new Ship(Type.TwoDeck),
+            new Ship(Type.TwoDeck),
+            new Ship(Type.OneDeck),
+            new Ship(Type.OneDeck),
+            new Ship(Type.OneDeck),
+            new Ship(Type.OneDeck)
         };
 
         #endregion
