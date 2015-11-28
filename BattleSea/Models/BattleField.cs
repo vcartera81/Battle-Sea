@@ -12,6 +12,8 @@ namespace BattleSea.Models
 
         private readonly Random _random = new Random();
         private readonly int _size;
+        public delegate void FiredEventHandler(object sender, FiredEventArgs e);
+        public event FiredEventHandler Fired;
 
         #endregion
 
@@ -67,6 +69,9 @@ namespace BattleSea.Models
                 default:
                     throw new ArgumentOutOfRangeException();
             }
+
+            //call event
+            Fired?.Invoke(this, new FiredEventArgs { Coordinate = coordinate, Result = Field[coordinate] });
 
             return Field[coordinate];
         }
@@ -124,5 +129,11 @@ namespace BattleSea.Models
         };
 
         #endregion
+    }
+
+    public class FiredEventArgs : EventArgs
+    {
+        public Coordinate Coordinate { get; set; }
+        public CellState Result { get; set; }
     }
 }

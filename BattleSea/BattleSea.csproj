@@ -146,6 +146,7 @@
     <Compile Include="Models\GameState.cs" />
     <Compile Include="Models\Player.cs" />
     <Compile Include="Models\Ship.cs" />
+    <Compile Include="Models\Turn.cs" />
     <Compile Include="Properties\AssemblyInfo.cs" />
   </ItemGroup>
   <ItemGroup>

@@ -15,6 +15,10 @@ namespace BattleSea.Models
             FirstPlayer = new Player(fieldSize);
             SecondPlayer = new Player(fieldSize);
             _fieldSize = fieldSize;
+
+            //register event handlers
+            FirstPlayer.BattleField.Fired += FirstPlayerOnFired;
+            SecondPlayer.BattleField.Fired += SecondPlayerOnFired;
         }
 
         public Player FirstPlayer { get; set; }
@@ -37,6 +41,8 @@ namespace BattleSea.Models
 
         public GameState State { get; private set; }
 
+        public Turn Turn { get; private set; }
+
         public void Start()
         {
             if (State == GameState.Initialized)
@@ -44,5 +50,19 @@ namespace BattleSea.Models
             else
                 throw new InvalidOperationException($"Cannot start the Game when it's state is {State}.");
         }
+
+        #region Events Handlers
+
+        private void SecondPlayerOnFired(object sender, FiredEventArgs e)
+        {
+            Turn = Turn.FirstPlayer;
+        }
+
+        private void FirstPlayerOnFired(object sender, FiredEventArgs e)
+        {
+            Turn = Turn.SecondPlayer;
+        }
+
+        #endregion
     }
 }
