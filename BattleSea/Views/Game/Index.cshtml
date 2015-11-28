@@ -129,6 +129,8 @@
         var battleField;
         var columnsArray = "ABCDEFGHIJKLMNOPQRSTUVWXYZ";
         var deckSize = 50;
+        var firstPlayerBattlefield = [];
+        var secondPlayerBattlefield = [];
 
         var getBattlefieldAndRender = function () {
             $.ajax({
@@ -138,10 +140,11 @@
                 dataType: "json",
                 contentType: "application/json; charset=utf-8",
                 success: function (response) {
-                    $("#mine .fieldArea").empty();
-                    $("#theirs .fieldArea").empty();
-                    renderField($("#mine .fieldArea"), response.FirstPlayer.BattleField.Field.Cells);
-                    renderField($("#theirs .fieldArea"), response.SecondPlayerHiddenShips.BattleField.Field.Cells);
+                    firstPlayerBattlefield  = response.FirstPlayer.BattleField.Field.Cells;
+                    secondPlayerBattlefield = response.SecondPlayerHiddenShips.BattleField.Field.Cells;
+
+                    renderField($("#mine .fieldArea"), firstPlayerBattlefield);
+                    renderField($("#theirs .fieldArea"), secondPlayerBattlefield);
 
                     @if (Model.State == GameState.Started)
                     {
@@ -175,11 +178,17 @@
             });
         }
 
+        $(window).resize(function() {
+            renderField($("#mine .fieldArea"), firstPlayerBattlefield);
+            renderField($("#theirs .fieldArea"), secondPlayerBattlefield);
+        });
+
         $(document).ready(function () {
             getBattlefieldAndRender();
         });
 
         var renderField = function (wrapper, data) {
+            $(wrapper).empty();
             var cellWidth = $(wrapper).width() / data.length;
             var cellHeight = $(wrapper).height() / data.length;
 
