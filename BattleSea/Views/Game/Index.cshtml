@@ -140,8 +140,8 @@
                 dataType: "json",
                 contentType: "application/json; charset=utf-8",
                 success: function (response) {
-                    firstPlayerBattlefield  = response.FirstPlayer.BattleField.Field.Cells;
-                    secondPlayerBattlefield = response.SecondPlayerHiddenShips.BattleField.Field.Cells;
+                    firstPlayerBattlefield  = response.You.BattleField.Field.Cells;
+                    secondPlayerBattlefield = response.Opponent.BattleField.Field.Cells;
 
                     renderField($("#mine .fieldArea"), firstPlayerBattlefield);
                     renderField($("#theirs .fieldArea"), secondPlayerBattlefield);

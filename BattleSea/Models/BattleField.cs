@@ -10,7 +10,7 @@ namespace BattleSea.Models
     {
         #region FIELDS
 
-        private readonly Random _random = new Random();
+        private readonly Random _random = new Random(DateTime.Now.Millisecond);
         private readonly int _size;
         public delegate void FiredEventHandler(object sender, FiredEventArgs e);
         public event FiredEventHandler Fired;

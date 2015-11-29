@@ -1,4 +1,7 @@
-﻿using System.Web.Mvc;
+﻿using System;
+using System.Collections.Generic;
+using System.Linq;
+using System.Web.Mvc;
 using BattleSea.Models;
 
 namespace BattleSea.Controllers
@@ -6,21 +9,58 @@ namespace BattleSea.Controllers
     public abstract class BattleControllerBase : Controller
     {
         protected readonly Game Game;
+        protected readonly Guid PlayerId;
+
+        private static readonly ICollection<Game> Games;
+
+        static BattleControllerBase()
+        {
+            Games = new List<Game>();
+        }
 
         protected BattleControllerBase()
         {
-            if (System.Web.HttpContext.Current.Session["Game"] == null)
-                InitGame();
+            if (System.Web.HttpContext.Current.Session["PlayerId"] == null)
+            {
+                if (Games.Any(g => !g.FirstPlayer.IsAvailable && !g.SecondPlayer.IsAvailable) || !Games.Any())
+                    InitGame();
 
-            Game = System.Web.HttpContext.Current.Session["Game"] as Game;
+                var gameWithoutFirstPlayer =
+                    Games.FirstOrDefault(g => !g.FirstPlayer.IsAvailable);
+
+                if (gameWithoutFirstPlayer != null)
+                {
+                    gameWithoutFirstPlayer.FirstPlayer.InitPlayer();
+                    //gameWithoutFirstPlayer.FirstPlayer.BattleField.PlaceShipsRandomly();
+                    PlayerId = gameWithoutFirstPlayer.FirstPlayer.Id;
+                    System.Web.HttpContext.Current.Session["PlayerId"] = gameWithoutFirstPlayer.FirstPlayer.Id;
+                    Game = gameWithoutFirstPlayer;
+                    return;
+                }
+
+                var gameWithoutSecondPlayer =
+                    Games.FirstOrDefault(g => !g.SecondPlayer.IsAvailable && g.FirstPlayer.IsAvailable);
+
+                if (gameWithoutSecondPlayer != null)
+                {
+                    gameWithoutSecondPlayer.SecondPlayer.InitPlayer();
+                    //gameWithoutSecondPlayer.SecondPlayer.BattleField.PlaceShipsRandomly();
+                    PlayerId = gameWithoutSecondPlayer.SecondPlayer.Id;
+                    System.Web.HttpContext.Current.Session["PlayerId"] = gameWithoutSecondPlayer.SecondPlayer.Id;
+                    Game = gameWithoutSecondPlayer;
+                }
+            }
+            else
+            {
+                PlayerId = (Guid)System.Web.HttpContext.Current.Session["PlayerId"];
+                Game = Games.First(g => g.FirstPlayer.Id == PlayerId || g.SecondPlayer.Id == PlayerId);
+            }
         }
 
         private static void InitGame()
         {
             var game = new Game(10);
-            game.FirstPlayer.BattleField.PlaceShipsRandomly();
-            game.SecondPlayer.BattleField.PlaceShipsRandomly();
-            System.Web.HttpContext.Current.Session["Game"] = game;
+            Games.Add(game);
         }
     }
 }

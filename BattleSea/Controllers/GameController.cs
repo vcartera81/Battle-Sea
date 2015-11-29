@@ -6,7 +6,7 @@ namespace BattleSea.Controllers
 {
     public class GameController : BattleControllerBase
     {
-        public ActionResult Index(Guid id)
+        public ActionResult Index(Guid id, Guid playerId)
         {
             if (id != Game.Id)
                 throw new Exception("Game not found");
@@ -17,14 +17,20 @@ namespace BattleSea.Controllers
         [HttpPost]
         public JsonResult GetCurrentBattlefield()
         {
-            return Json(Game);
+            return Json(new GameViewModel
+            {
+                State = Game.State,
+                PlayerId = PlayerId,
+                You = Game.GetPlayerById(PlayerId),
+                Opponent = Game.GetPlayerById(PlayerId, true)/*.ObfuscateBattlefield()*/
+            });
         }
 
         [HttpPost]
         public void ShuffleShips()
         {
             if (Game.State == GameState.Initialized)
-                Game.FirstPlayer.BattleField.PlaceShipsRandomly();
+                Game.GetPlayerById(PlayerId).BattleField.PlaceShipsRandomly();
         }
 
         [HttpPost]

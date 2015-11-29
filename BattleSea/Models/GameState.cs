@@ -4,6 +4,7 @@
     {
         Initialized,
         Started,
-        Finished
+        Finished,
+        Abandoned
     }
 }

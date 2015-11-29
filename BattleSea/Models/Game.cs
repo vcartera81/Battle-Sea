@@ -24,21 +24,6 @@ namespace BattleSea.Models
         public Player FirstPlayer { get; set; }
         internal Player SecondPlayer { get; set; }
 
-        public Player SecondPlayerHiddenShips
-        {
-            get
-            {
-                //hide battlefield ships for second user
-                var allCells = SecondPlayer.BattleField.Field.AsSingleCollection();
-                var censoredBattleField = new BattleField(_fieldSize);
-                allCells.ForEach(c => censoredBattleField.Field[c.Coordinate] = c.State == CellState.ShipDeck ? CellState.Empty : c.State);
-                return new Player(_fieldSize)
-                {
-                    BattleField = censoredBattleField
-                };
-            }
-        }
-
         public GameState State { get; private set; }
 
         public Turn Turn { get; private set; }
@@ -49,6 +34,16 @@ namespace BattleSea.Models
                 State = GameState.Started;
             else
                 throw new InvalidOperationException($"Cannot start the Game when it's state is {State}.");
+        }
+
+        public Player GetPlayerById(Guid id, bool theOtherOne = false)
+        {
+            if (FirstPlayer.Id == id)
+                return theOtherOne ? SecondPlayer : FirstPlayer;
+            else if (SecondPlayer.Id == id)
+                return theOtherOne ? FirstPlayer : SecondPlayer;
+
+            throw new ArgumentException("No player with provided ID was found in this game.");
         }
 
         #region Events Handlers

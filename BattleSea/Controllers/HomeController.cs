@@ -6,7 +6,7 @@ namespace BattleSea.Controllers
     {
         public RedirectToRouteResult Index()
         {
-            return RedirectToAction(null, "Game", new { id = Game.Id });
+            return RedirectToAction(null, "Game", new { id = Game.Id, PlayerId });
         }
     }
 }

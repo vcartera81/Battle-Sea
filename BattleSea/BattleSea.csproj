@@ -144,6 +144,7 @@
     <Compile Include="Models\Exceptions\InvalidShotException.cs" />
     <Compile Include="Models\Game.cs" />
     <Compile Include="Models\GameState.cs" />
+    <Compile Include="Models\GameViewModel.cs" />
     <Compile Include="Models\Player.cs" />
     <Compile Include="Models\Ship.cs" />
     <Compile Include="Models\Turn.cs" />
