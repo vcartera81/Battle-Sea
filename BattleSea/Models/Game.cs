@@ -1,4 +1,5 @@
 ﻿using System;
+using BattleSea.Models.Enums;
 using WebGrease.Css.Extensions;
 
 namespace BattleSea.Models
@@ -22,7 +23,7 @@ namespace BattleSea.Models
         }
 
         public Player FirstPlayer { get; set; }
-        internal Player SecondPlayer { get; set; }
+        public Player SecondPlayer { get; set; }
 
         public GameState State { get; private set; }
 

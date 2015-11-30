@@ -1,4 +1,5 @@
 ﻿using System;
+using BattleSea.Models.Enums;
 using WebGrease.Css.Extensions;
 
 namespace BattleSea.Models

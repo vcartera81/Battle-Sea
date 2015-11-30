@@ -1,5 +1,6 @@
 using System;
 using System.Collections.Generic;
+using BattleSea.Models.Enums;
 
 namespace BattleSea.Models
 {

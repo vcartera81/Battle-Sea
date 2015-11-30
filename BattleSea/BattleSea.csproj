@@ -139,15 +139,15 @@
     <Compile Include="Models\BattleField.cs" />
     <Compile Include="Models\BattleFieldCells.cs" />
     <Compile Include="Models\Cell.cs" />
-    <Compile Include="Models\CellState.cs" />
+    <Compile Include="Models\Enums\CellState.cs" />
     <Compile Include="Models\Coordinate.cs" />
     <Compile Include="Models\Exceptions\InvalidShotException.cs" />
     <Compile Include="Models\Game.cs" />
-    <Compile Include="Models\GameState.cs" />
+    <Compile Include="Models\Enums\GameState.cs" />
     <Compile Include="Models\GameViewModel.cs" />
     <Compile Include="Models\Player.cs" />
     <Compile Include="Models\Ship.cs" />
-    <Compile Include="Models\Turn.cs" />
+    <Compile Include="Models\Enums\Turn.cs" />
     <Compile Include="Properties\AssemblyInfo.cs" />
   </ItemGroup>
   <ItemGroup>

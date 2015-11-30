@@ -1,4 +1,5 @@
 ﻿using System;
+using BattleSea.Models.Enums;
 
 namespace BattleSea.Models
 {

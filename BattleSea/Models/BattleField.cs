@@ -1,6 +1,7 @@
 ﻿using System;
 using System.Collections.Generic;
 using System.Linq;
+using BattleSea.Models.Enums;
 using BattleSea.Models.Exceptions;
 using WebGrease.Css.Extensions;
 

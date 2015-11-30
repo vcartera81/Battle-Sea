@@ -1,6 +1,7 @@
 ﻿using System;
 using System.Web.Mvc;
 using BattleSea.Models;
+using BattleSea.Models.Enums;
 
 namespace BattleSea.Controllers
 {

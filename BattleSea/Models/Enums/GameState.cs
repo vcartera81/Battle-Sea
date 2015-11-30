@@ -1,4 +1,4 @@
-﻿namespace BattleSea.Models
+﻿namespace BattleSea.Models.Enums
 {
     public enum GameState
     {
