@@ -22,7 +22,7 @@ namespace BattleSea.Controllers
                 State = Game.State,
                 PlayerId = PlayerId,
                 You = Game.GetPlayerById(PlayerId),
-                Opponent = Game.GetPlayerById(PlayerId, true)/*.ObfuscateBattlefield()*/
+                Opponent = Game.GetPlayerById(PlayerId, true).ObfuscateBattlefield()
             });
         }
 
@@ -36,7 +36,7 @@ namespace BattleSea.Controllers
         [HttpPost]
         public JsonResult Fire(Coordinate coordinate)
         {
-            return Json(Game.SecondPlayer.BattleField.Fire(coordinate));
+            return Json(Game.GetPlayerById(PlayerId, true).BattleField.Fire(coordinate));
         }
 
         [HttpPost]
