@@ -2,6 +2,7 @@
 using System.Web.Mvc;
 using BattleSea.Models;
 using BattleSea.Models.Enums;
+using Microsoft.AspNet.SignalR;
 
 namespace BattleSea.Controllers
 {
@@ -37,6 +38,9 @@ namespace BattleSea.Controllers
         [HttpPost]
         public JsonResult Fire(Coordinate coordinate)
         {
+            var context = GlobalHost.ConnectionManager.GetHubContext<BattleSeaHub>();
+            context.Clients.All.opponentFire(new { test = 123 });
+
             return Json(Game.GetPlayerById(PlayerId, true).BattleField.Fire(coordinate));
         }
 
