@@ -156,7 +156,7 @@
     <Compile Include="App_Start\Owin.cs" />
     <Compile Include="App_Start\RouteConfig.cs" />
     <Compile Include="App_Start\WebApiConfig.cs" />
-    <Compile Include="Controllers\BattleControllerBase.cs" />
+    <Compile Include="Controllers\GameContext.cs" />
     <Compile Include="Controllers\GameController.cs" />
     <Compile Include="Controllers\HomeController.cs" />
     <Compile Include="Global.asax.cs">

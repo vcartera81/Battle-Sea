@@ -6,19 +6,19 @@ using BattleSea.Models;
 
 namespace BattleSea.Controllers
 {
-    public abstract class BattleControllerBase : Controller
+    public abstract class GameContext : Controller
     {
         protected readonly Game Game;
         protected readonly Guid PlayerId;
 
         private static readonly ICollection<Game> Games;
 
-        static BattleControllerBase()
+        static GameContext()
         {
             Games = new List<Game>();
         }
 
-        protected BattleControllerBase()
+        protected GameContext()
         {
             if (System.Web.HttpContext.Current.Session["PlayerId"] == null)
             {
@@ -55,6 +55,11 @@ namespace BattleSea.Controllers
                 PlayerId = (Guid)System.Web.HttpContext.Current.Session["PlayerId"];
                 Game = Games.First(g => g.FirstPlayer.Id == PlayerId || g.SecondPlayer.Id == PlayerId);
             }
+        }
+
+        protected void SetPlayerSignalRConnectionId(Guid connection)
+        {
+            Game.GetPlayerById(PlayerId).RegisterSignalRConnection(connection);
         }
 
         private static void InitGame()

@@ -3,10 +3,11 @@ using System.Web.Mvc;
 using BattleSea.Models;
 using BattleSea.Models.Enums;
 using Microsoft.AspNet.SignalR;
+using WebGrease.Css.Extensions;
 
 namespace BattleSea.Controllers
 {
-    public class GameController : BattleControllerBase
+    public class GameController : GameContext
     {
         public ActionResult Index(Guid id, Guid playerId)
         {
@@ -38,16 +39,33 @@ namespace BattleSea.Controllers
         [HttpPost]
         public JsonResult Fire(Coordinate coordinate)
         {
-            var context = GlobalHost.ConnectionManager.GetHubContext<BattleSeaHub>();
-            context.Clients.All.opponentFire(new { test = 123 });
+            var fireResult = Game.GetPlayerById(PlayerId, true).BattleField.Fire(coordinate);
 
-            return Json(Game.GetPlayerById(PlayerId, true).BattleField.Fire(coordinate));
+            var srConnections = Game.GetPlayerById(PlayerId, true).GetSignalRConnections();
+            var srContext = GlobalHost.ConnectionManager.GetHubContext<BattleSeaHub>();
+            srConnections.ForEach(c => srContext
+                .Clients
+                .Client(c.ToString())
+                .opponentFire(new
+                {
+                    coordinate,
+                    fireResult
+                }));
+
+            return Json(fireResult);
         }
 
         [HttpPost]
         public void Start()
         {
             Game.Start();
+        }
+
+        [HttpPost]
+        public JsonResult RegisterPlayer(Guid connection)
+        {
+            SetPlayerSignalRConnectionId(connection);
+            return new JsonResult();
         }
     }
 }

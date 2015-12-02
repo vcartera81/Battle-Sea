@@ -1,4 +1,5 @@
 ﻿using System;
+using System.Collections.Generic;
 using BattleSea.Models.Enums;
 using WebGrease.Css.Extensions;
 
@@ -7,6 +8,7 @@ namespace BattleSea.Models
     public class Player
     {
         private readonly int _fieldSize;
+        private readonly HashSet<Guid> _signalRConnections = new HashSet<Guid>();
 
         public Player(int fieldSize)
         {
@@ -37,6 +39,17 @@ namespace BattleSea.Models
                 Id = Id,
                 BattleField = censoredBattleField
             };
+        }
+
+        public void RegisterSignalRConnection(Guid id)
+        {
+            if (id != Guid.Empty)
+                _signalRConnections.Add(id);
+        }
+
+        public IEnumerable<Guid> GetSignalRConnections()
+        {
+            return _signalRConnections;
         }
     }
 }

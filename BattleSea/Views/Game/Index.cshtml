@@ -132,12 +132,18 @@
 
 <script type="text/javascript">
     $.connection.hub.start().done(function (hub) {
-
-        
+        //register player
+        $.ajax({
+            type: "POST",
+            url: "@Url.Action("RegisterPlayer")",
+            data: JSON.stringify({ connection: hub.id }),
+            dataType: "json",
+            contentType: "application/json; charset=utf-8"
+        });
     });
 
-    $.connection.battleSeaHub.client.opponentFire = function (evObj) {
-        debugger;
+    $.connection.battleSeaHub.client.opponentFire = function (fireResult) {
+        $("#mine .battlefield-cell[data-column=" + fireResult.coordinate.Column + "][data-row=" + fireResult.coordinate.Row + "]").attr("data-value", fireResult.fireResult);
     };
 
     var battleField;

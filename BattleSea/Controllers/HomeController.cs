@@ -2,7 +2,7 @@
 
 namespace BattleSea.Controllers
 {
-    public class HomeController : BattleControllerBase
+    public class HomeController : GameContext
     {
         public RedirectToRouteResult Index()
         {
