@@ -18,7 +18,7 @@
 
         .section {
             width: 50%;
-            height: 500px;
+            height: 600px;
             float: left;
             overflow: hidden;
             position: relative;
@@ -30,20 +30,20 @@
             border: 1px solid #fff;
         }
 
-        /* Ship Deck */
-        .battlefield-cell[data-value='1'] {
-            background-color: #2e9f76;
-        }
+            /* Ship Deck */
+            .battlefield-cell[data-value='1'] {
+                background-color: #2e9f76;
+            }
 
-        /* Shot */
-        .battlefield-cell[data-value='2'] {
-            background-color: #5b6461;
-        }
+            /* Shot */
+            .battlefield-cell[data-value='2'] {
+                background-color: #5b6461;
+            }
 
-        /* Exploded */
-        .battlefield-cell[data-value='3'] {
-            background-color: #e15969;
-        }
+            /* Exploded */
+            .battlefield-cell[data-value='3'] {
+                background-color: #e15969;
+            }
 
         /*#mine {
             padding: 20px;
@@ -73,11 +73,11 @@
             font-weight: 500;
         }
 
-        .span-button:hover {
-            background-color: #ccc;
-            color: white;
-            border: none;
-        }
+            .span-button:hover {
+                background-color: #ccc;
+                color: white;
+                border: none;
+            }
 
         .whom-label {
             position: absolute;
@@ -93,9 +93,9 @@
             cursor: pointer;
         }
 
-        .cell-selectable:hover {
-            opacity: 0.6;
-        }
+            .cell-selectable:hover {
+                opacity: 0.6;
+            }
     </style>
     <link href="https://fonts.googleapis.com/css?family=Roboto:400,500,400italic,500italic,700italic,700,900,900italic,300italic,300,100italic,100" rel="stylesheet" type="text/css">
     <script src="https://ajax.googleapis.com/ajax/libs/jquery/1.11.3/jquery.min.js"></script>
@@ -130,155 +130,159 @@
         <span id="startGameBtn" class="span-button" onclick="startGame()" style="display: inline-block; margin-left: 49%; position: absolute;">Start game!</span>
     }
 
-<script type="text/javascript">
-    $.connection.hub.start().done(function (hub) {
-        //register player
-        $.ajax({
-            type: "POST",
-            url: "@Url.Action("RegisterPlayer")",
-            data: JSON.stringify({ connection: hub.id }),
-            dataType: "json",
-            contentType: "application/json; charset=utf-8"
+    <script type="text/javascript">
+        $.connection.hub.start().done(function (hub) {
+            //register player
+            $.ajax({
+                type: "POST",
+                url: "@Url.Action("RegisterPlayer")",
+                data: JSON.stringify({ connection: hub.id }),
+                dataType: "json",
+                contentType: "application/json; charset=utf-8"
+            });
         });
-    });
 
-    $.connection.battleSeaHub.client.opponentFire = function (fireResult) {
-        $("#mine .battlefield-cell[data-column=" + fireResult.coordinate.Column + "][data-row=" + fireResult.coordinate.Row + "]").attr("data-value", fireResult.fireResult);
-    };
+        $.connection.battleSeaHub.client.opponentFire = function (fireResult) {
+            $("#mine .battlefield-cell[data-column=" + fireResult.coordinate.Column + "][data-row=" + fireResult.coordinate.Row + "]").attr("data-value", fireResult.fireResult);
+        };
 
-    var battleField;
-    var columnsArray = "ABCDEFGHIJKLMNOPQRSTUVWXYZ";
-    var deckSize = 50;
-    var firstPlayerBattlefield = [];
-    var secondPlayerBattlefield = [];
+        var battleField;
+        var columnsArray = "ABCDEFGHIJKLMNOPQRSTUVWXYZ";
+        var deckSize = 50;
+        var firstPlayerBattlefield = [];
+        var secondPlayerBattlefield = [];
 
-    var getBattlefieldAndRender = function () {
-        $.ajax({
-            type: "POST",
-            url: "@Url.Action("GetCurrentBattlefield")",
-            data: {},
-            dataType: "json",
-            contentType: "application/json; charset=utf-8",
-            success: function (response) {
-                firstPlayerBattlefield  = response.You.BattleField.Field.Cells;
-                secondPlayerBattlefield = response.Opponent.BattleField.Field.Cells;
+        var getBattlefieldAndRender = function () {
+            $.ajax({
+                type: "POST",
+                url: "@Url.Action("GetCurrentBattlefield")",
+                data: {},
+                dataType: "json",
+                contentType: "application/json; charset=utf-8",
+                success: function (response) {
+                    firstPlayerBattlefield = response.You.BattleField.Field.Cells;
+                    secondPlayerBattlefield = response.Opponent.BattleField.Field.Cells;
 
-                renderField($("#mine .fieldArea"), firstPlayerBattlefield);
-                renderField($("#theirs .fieldArea"), secondPlayerBattlefield);
+                    renderField($("#mine .fieldArea"), firstPlayerBattlefield);
+                    renderField($("#theirs .fieldArea"), secondPlayerBattlefield);
 
-                @if (Model.State == GameState.Started)
+                    @if (Model.State == GameState.Started)
                 {
                     <text>activateCells();</text>
                     }
-            }
-        });
-    };
-
-    var shuffleShips = function () {
-        $.ajax({
-            type: "POST",
-            url: "@Url.Action("ShuffleShips")",
-            data: {},
-            success: function (d) {
-                getBattlefieldAndRender();
-            }
-        });
-    }
-
-    var startGame = function () {
-        $.ajax({
-            type: "POST",
-            url: "@Url.Action("Start")",
-            data: {},
-            success: function (d) {
-                $("#startGameBtn").remove();
-                $("#shuffleBtn").remove();
-                activateCells();
-            }
-        });
-    }
-
-    $(window).resize(function() {
-        renderField($("#mine .fieldArea"), firstPlayerBattlefield);
-        renderField($("#theirs .fieldArea"), secondPlayerBattlefield);
-    });
-
-    $(document).ready(function () {
-        getBattlefieldAndRender();
-    });
-
-    var renderField = function (wrapper, data) {
-        $(wrapper).empty();
-        var cellWidth = $(wrapper).width() / data.length;
-        var cellHeight = $(wrapper).height() / data.length;
-
-        $.each(data, function (rowIndex, row) {
-            $.each(row, function (columnIndex, cellValue) {
-                var cell = document.createElement("div");
-                $(cell).css({
-                    "height": cellHeight,
-                    "width": cellWidth,
-                    "margin-left": columnIndex * cellWidth,
-                    "margin-top": rowIndex * cellHeight
-                }).attr({
-                    "class": "battlefield-cell",
-                    "data-value": cellValue,
-                    "data-row": rowIndex,
-                    "data-column": columnsArray[columnIndex]
-                });
-
-                $(wrapper).append(cell);
+                }
             });
-        });
-    }
+        };
 
-    var activateCells = function () {
-        //set cells selectable
-        $("#theirs .battlefield-cell").each(function () {
-            $(this).addClass("cell-selectable");
+        var shuffleShips = function () {
+            $.ajax({
+                type: "POST",
+                url: "@Url.Action("ShuffleShips")",
+                data: {},
+                success: function (d) {
+                    getBattlefieldAndRender();
+                }
+            });
+        }
+
+        var startGame = function () {
+            $.ajax({
+                type: "POST",
+                url: "@Url.Action("Start")",
+                data: {},
+                success: function (d) {
+                    $("#startGameBtn").remove();
+                    $("#shuffleBtn").remove();
+                    activateCells();
+                }
+            });
+        }
+
+        $(window).resize(function () {
+            renderField($("#mine .fieldArea"), firstPlayerBattlefield);
+            renderField($("#theirs .fieldArea"), secondPlayerBattlefield);
         });
 
-        $("#theirs .battlefield-cell").click(function () {
-            //fire
-            var that = $(this);
-            if ($(this).attr("data-value") == "0") {
-                $.ajax({
-                    type: "POST",
-                    url: "@Url.Action("Fire")",
-                    data: JSON.stringify({
-                        coordinate: {
-                            Column: $(this).attr("data-column"),
-                            Row: $(this).attr("data-row")
-                        }
-                    }),
-                    dataType: "json",
-                    contentType: "application/json; charset=utf-8",
-                    success: function (response) {
-                        $(that).attr("data-value", response);
-                    }
+        $(document).ready(function () {
+            getBattlefieldAndRender();
+        });
+
+        var renderField = function (wrapper, data) {
+            $(wrapper).empty();
+
+            var cellSize = $(wrapper).width() / data.length;
+            if (cellSize * data.length > $(wrapper).height())
+                cellSize = $(wrapper).height() / data.length;
+
+            var cellsLeftOffset = ($(wrapper).width() - (cellSize * data.length)) / 2;
+
+            $.each(data, function (rowIndex, row) {
+                $.each(row, function (columnIndex, cellValue) {
+                    var cell = document.createElement("div");
+                    $(cell).css({
+                        "height": cellSize,
+                        "width": cellSize,
+                        "margin-left": columnIndex * cellSize + cellsLeftOffset,
+                        "margin-top": rowIndex * cellSize
+                    }).attr({
+                        "class": "battlefield-cell",
+                        "data-value": cellValue,
+                        "data-row": rowIndex,
+                        "data-column": columnsArray[columnIndex]
+                    });
+
+                    $(wrapper).append(cell);
                 });
-            }
-        });
-    }
+            });
+        }
 
-    //var renderShips = function (wrapper, data) {
-    //    $.each(data, function(index, ship) {
-    //        var shipDiv = document.createElement("div");
-    //        $(shipDiv).attr({
-    //            "data-deck-size": ship.Type,
-    //            "class": "droppable-ship"
-    //        }).css({
-    //            "height": deckSize,
-    //            "width": deckSize * ship.Type
-    //        }).draggable({
-    //            revert: "invalid",
-    //            snap: true,
-    //            snapTolerance: 20
-    //        });
+        var activateCells = function () {
+            //set cells selectable
+            $("#theirs .battlefield-cell").each(function () {
+                $(this).addClass("cell-selectable");
+            });
 
-    //        $(wrapper).append(shipDiv);
-    //    });
-    //}
-</script>
+            $("#theirs .battlefield-cell").click(function () {
+                //fire
+                var that = $(this);
+                if ($(this).attr("data-value") == "0") {
+                    $.ajax({
+                        type: "POST",
+                        url: "@Url.Action("Fire")",
+                        data: JSON.stringify({
+                            coordinate: {
+                                Column: $(this).attr("data-column"),
+                                Row: $(this).attr("data-row")
+                            }
+                        }),
+                        dataType: "json",
+                        contentType: "application/json; charset=utf-8",
+                        success: function (response) {
+                            $(that).attr("data-value", response);
+                        }
+                    });
+                }
+            });
+        }
+
+        //var renderShips = function (wrapper, data) {
+        //    $.each(data, function(index, ship) {
+        //        var shipDiv = document.createElement("div");
+        //        $(shipDiv).attr({
+        //            "data-deck-size": ship.Type,
+        //            "class": "droppable-ship"
+        //        }).css({
+        //            "height": deckSize,
+        //            "width": deckSize * ship.Type
+        //        }).draggable({
+        //            revert: "invalid",
+        //            snap: true,
+        //            snapTolerance: 20
+        //        });
+
+        //        $(wrapper).append(shipDiv);
+        //    });
+        //}
+    </script>
 </body>
 </html>
