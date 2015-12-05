@@ -51,12 +51,12 @@ namespace BattleSea.Models
 
         private void SecondPlayerOnFired(object sender, FiredEventArgs e)
         {
-            Turn = Turn.FirstPlayer;
+            Turn = Turn.SecondPlayer;
         }
 
         private void FirstPlayerOnFired(object sender, FiredEventArgs e)
         {
-            Turn = Turn.SecondPlayer;
+            Turn = Turn.FirstPlayer;
         }
 
         #endregion

@@ -52,6 +52,18 @@ namespace BattleSea.Controllers
                     fireResult
                 }));
 
+            if (Game.Turn == Turn.FirstPlayer)
+            {
+                Game.FirstPlayer.GetSignalRConnections().ForEach(c => srContext.Clients.Client(c.ToString()).unlockField());
+                Game.SecondPlayer.GetSignalRConnections().ForEach(c => srContext.Clients.Client(c.ToString()).lockField());
+            }
+            else if (Game.Turn == Turn.SecondPlayer)
+            {
+                Game.SecondPlayer.GetSignalRConnections().ForEach(c => srContext.Clients.Client(c.ToString()).unlockField());
+                Game.FirstPlayer.GetSignalRConnections().ForEach(c => srContext.Clients.Client(c.ToString()).lockField());
+            }
+
+
             return Json(fireResult);
         }
 

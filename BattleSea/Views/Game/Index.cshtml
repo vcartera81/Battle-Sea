@@ -89,6 +89,13 @@
             font-size: 25px;
         }
 
+        .tr-mesh {
+            width: 100%;
+            height: 100%;
+            position: absolute;
+            z-index: 55;
+        }
+
         .cell-selectable {
             cursor: pointer;
         }
@@ -119,6 +126,7 @@
             }
         </div>
         <div class="section" id="theirs">
+            <div class="tr-mesh" style="display: none;"></div>
             <span class="whom-label">Opponent</span>
             <div class="fieldArea">
 
@@ -145,6 +153,16 @@
         $.connection.battleSeaHub.client.opponentFire = function (fireResult) {
             $("#mine .battlefield-cell[data-column=" + fireResult.coordinate.Column + "][data-row=" + fireResult.coordinate.Row + "]").attr("data-value", fireResult.fireResult);
         };
+
+        $.connection.battleSeaHub.client.lockField = function() {
+            $("#theirs").animate({ "opacity": "0.5" }, 500);
+            $(".tr-mesh").show();
+        }
+
+        $.connection.battleSeaHub.client.unlockField = function () {
+            $("#theirs").animate({ "opacity": "1" }, 500);
+            $(".tr-mesh").hide();
+        }
 
         var battleField;
         var columnsArray = "ABCDEFGHIJKLMNOPQRSTUVWXYZ";
@@ -199,8 +217,11 @@
         }
 
         $(window).resize(function () {
-            renderField($("#mine .fieldArea"), firstPlayerBattlefield);
-            renderField($("#theirs .fieldArea"), secondPlayerBattlefield);
+            if (timeout) clearTimeout(timeout);
+
+            var timeout = setTimeout(function() {
+                getBattlefieldAndRender();
+            }, 2000);
         });
 
         $(document).ready(function () {
