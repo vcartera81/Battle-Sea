@@ -1,6 +1,5 @@
 ﻿using System;
 using BattleSea.Models.Enums;
-using WebGrease.Css.Extensions;
 
 namespace BattleSea.Models
 {
@@ -51,12 +50,14 @@ namespace BattleSea.Models
 
         private void SecondPlayerOnFired(object sender, FiredEventArgs e)
         {
-            Turn = Turn.SecondPlayer;
+            if (e.Result != CellState.Exploded)
+                Turn = Turn.SecondPlayer;
         }
 
         private void FirstPlayerOnFired(object sender, FiredEventArgs e)
         {
-            Turn = Turn.FirstPlayer;
+            if (e.Result != CellState.Exploded)
+                Turn = Turn.FirstPlayer;
         }
 
         #endregion

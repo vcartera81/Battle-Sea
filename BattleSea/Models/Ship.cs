@@ -4,11 +4,14 @@ namespace BattleSea.Models
 {
     public class Ship
     {
+        public Guid Id { get; private set; }
+
         public Ship()
         {
+            Id = Guid.NewGuid();
         }
 
-        public Ship(Type type)
+        public Ship(Type type) : this()
         {
             Type = type;
         }

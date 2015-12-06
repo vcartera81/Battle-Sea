@@ -62,8 +62,7 @@ namespace BattleSea.Controllers
                 Game.SecondPlayer.GetSignalRConnections().ForEach(c => srContext.Clients.Client(c.ToString()).unlockField());
                 Game.FirstPlayer.GetSignalRConnections().ForEach(c => srContext.Clients.Client(c.ToString()).lockField());
             }
-
-
+            
             return Json(fireResult);
         }
 

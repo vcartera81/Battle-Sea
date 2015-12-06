@@ -15,22 +15,23 @@ namespace BattleSea.Models
         private readonly int _size;
         public delegate void FiredEventHandler(object sender, FiredEventArgs e);
         public event FiredEventHandler Fired;
-
+        private readonly IList<Ship> _ships; 
         #endregion
 
         #region PUBLIC
 
         public BattleFieldCells Field { get; private set; }
 
-        public IEnumerable<Ship> Ships { get; set; }
+        public IEnumerable<Ship> Ships => _ships;
 
         public BattleField(int size)
         {
             _size = size;
             Field = new BattleFieldCells(size);
+            _ships = new List<Ship>(_shipsDefaultCollection.Count());
         }
 
-        public BattleFieldCells PlaceShipsRandomly()
+        public void PlaceShipsRandomly()
         {
             //wipe cells
             Field = new BattleFieldCells(_size);
@@ -49,8 +50,6 @@ namespace BattleSea.Models
                     ship.StartingPoint = getRandomCoordinate();
                 }
             }
-
-            return Field;
         }
 
         public CellState Fire(Coordinate coordinate)
@@ -110,6 +109,11 @@ namespace BattleSea.Models
 
             //if everything went fine, persist possibleCoordinates on map
             possibleCoordinates.ForEach(c => Field[c] = CellState.ShipDeck);
+
+            //add ship to collection
+            _ships.Add(ship);
+
+            //create an id for the ship
             return true;
         }
 
