@@ -151,7 +151,7 @@
         });
 
         $.connection.battleSeaHub.client.opponentFire = function (fireResult) {
-            $("#mine .battlefield-cell[data-column=" + fireResult.coordinate.Column + "][data-row=" + fireResult.coordinate.Row + "]").attr("data-value", fireResult.fireResult);
+            $("#mine .battlefield-cell[data-column=" + fireResult.coordinate.Column + "][data-row=" + fireResult.coordinate.Row + "]").attr("data-value", fireResult.fireResult.State);
         };
 
         $.connection.battleSeaHub.client.lockField = function() {
@@ -247,7 +247,7 @@
                         "margin-top": rowIndex * cellSize
                     }).attr({
                         "class": "battlefield-cell",
-                        "data-value": cellValue,
+                        "data-value": cellValue.State,
                         "data-row": rowIndex,
                         "data-column": columnsArray[columnIndex]
                     });
@@ -279,7 +279,7 @@
                         dataType: "json",
                         contentType: "application/json; charset=utf-8",
                         success: function (response) {
-                            $(that).attr("data-value", response);
+                            $(that).attr("data-value", response.State);
                         }
                     });
                 }
@@ -290,11 +290,11 @@
         //    $.each(data, function(index, ship) {
         //        var shipDiv = document.createElement("div");
         //        $(shipDiv).attr({
-        //            "data-deck-size": ship.Type,
+        //            "data-deck-size": ship.ShipType,
         //            "class": "droppable-ship"
         //        }).css({
         //            "height": deckSize,
-        //            "width": deckSize * ship.Type
+        //            "width": deckSize * ship.ShipType
         //        }).draggable({
         //            revert: "invalid",
         //            snap: true,

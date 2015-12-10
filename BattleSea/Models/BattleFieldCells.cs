@@ -7,11 +7,11 @@ namespace BattleSea.Models
     public class BattleFieldCells
     {
         private readonly int _size;
-        private IList<IList<CellState>> _matrix;
+        private IList<IList<Cell>> _matrix;
 
-        public IEnumerable<IEnumerable<CellState>> Cells => _matrix;
+        public IEnumerable<IEnumerable<Cell>> Cells => _matrix;
 
-        public CellState this[Coordinate coord]
+        public Cell this[Coordinate coord]
         {
             get { return _matrix[coord.Row][coord.Column - 65]; }
             set { _matrix[coord.Row][coord.Column - 65] = value; }
@@ -46,7 +46,7 @@ namespace BattleSea.Models
                 try
                 {
                     var check = this[coord];
-                    if (this[coord] == CellState.ShipDeck)
+                    if (this[coord].State == CellState.ShipDeck)
                         return true;
                 }
                 catch (ArgumentOutOfRangeException)
@@ -78,7 +78,7 @@ namespace BattleSea.Models
                     collection.Add(new Cell
                     {
                         Coordinate = coordinate,
-                        State = this[coordinate]
+                        State = this[coordinate].State
                     });
                 }
             }
@@ -88,13 +88,13 @@ namespace BattleSea.Models
 
         private void Initialize()
         {
-            _matrix = new List<IList<CellState>>(_size);
+            _matrix = new List<IList<Cell>>(_size);
             for (var i = 0; i < _size; i++)
             {
-                _matrix.Add(new List<CellState>(_size));
+                _matrix.Add(new List<Cell>(_size));
                 for (var j = 0; j < _size; j++)
                 {
-                    _matrix[i].Add(CellState.Empty);
+                    _matrix[i].Add(new Cell { State = CellState.Empty, Coordinate = new Coordinate((char)(j + 65), i) });
                 }
             }
         }

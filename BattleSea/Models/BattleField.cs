@@ -13,9 +13,17 @@ namespace BattleSea.Models
 
         private readonly Random _random = new Random(DateTime.Now.Millisecond);
         private readonly int _size;
+        private readonly IList<Ship> _ships;
+
+        #endregion
+
+        #region EVENT HANDLERS
+
         public delegate void FiredEventHandler(object sender, FiredEventArgs e);
         public event FiredEventHandler Fired;
-        private readonly IList<Ship> _ships; 
+        public delegate void ShipDestroyedEventHandler(object sender, ShipDestroyedEventArgs e);
+        public event ShipDestroyedEventHandler ShipDestroyed;
+
         #endregion
 
         #region PUBLIC
@@ -52,15 +60,21 @@ namespace BattleSea.Models
             }
         }
 
-        public CellState Fire(Coordinate coordinate)
+        public Cell Fire(Coordinate coordinate)
         {
-            switch (Field[coordinate])
+            switch (Field[coordinate].State)
             {
                 case CellState.ShipDeck:
-                    Field[coordinate] = CellState.Exploded;
+                    Field[coordinate] = new Cell { State = CellState.Exploded, Coordinate = coordinate, ShipId = Field[coordinate].ShipId };
+                    var targetShip = _ships.First(s => s.Id == Field[coordinate].ShipId.Value);
+                    targetShip.Shot();
+
+                    //invoke ship destroyed event
+                    if (targetShip.ShipState == ShipState.Destroyed)
+                        ShipDestroyed?.Invoke(this, new ShipDestroyedEventArgs { Ship = targetShip });
                     break;
                 case CellState.Empty:
-                    Field[coordinate] = CellState.Shot;
+                    Field[coordinate] = new Cell { State = CellState.Shot, Coordinate = coordinate };
                     break;
                 case CellState.Exploded:
                     throw new InvalidShotException("Cannot shot again an exploded cell.");
@@ -71,7 +85,7 @@ namespace BattleSea.Models
             }
 
             //call event
-            Fired?.Invoke(this, new FiredEventArgs { Coordinate = coordinate, Result = Field[coordinate] });
+            Fired?.Invoke(this, new FiredEventArgs { Coordinate = coordinate, Result = Field[coordinate].State });
 
             return Field[coordinate];
         }
@@ -82,55 +96,51 @@ namespace BattleSea.Models
 
         private bool PlaceShip(Ship ship)
         {
-            var decks = (int)ship.Type;
+            var decks = (int)ship.ShipType;
             var possibleCoordinates = new Coordinate[decks];
+            var startingPoint = Coordinate.Copy(ship.StartingPoint);
 
             for (var i = 0; i < decks; i++)
             {
                 //try to validate
-                if (Field.ValidateCoordinate(ship.StartingPoint))
+                if (Field.ValidateCoordinate(startingPoint))
                 {
-                    //if there's already a ship on selected coordinate - invalidate ship position
-                    if (Field[ship.StartingPoint] == CellState.ShipDeck) return false;
-
                     //proximity check
-                    if (Field.ProximityCheck(ship.StartingPoint)) return false;
+                    if (Field.ProximityCheck(startingPoint)) return false;
+                    possibleCoordinates[i] = Coordinate.Copy(startingPoint);
 
-                    possibleCoordinates[i] = Coordinate.Copy(ship.StartingPoint);
-
-                    if (ship.Orientation == Orientation.Vertical)
-                        ship.StartingPoint.DecreaseRow();
+                    if (ship.ShipOrientation == ShipOrientation.Vertical)
+                        startingPoint.DecreaseRow();
                     else
-                        ship.StartingPoint.DecreaseColumn();
+                        startingPoint.DecreaseColumn();
                 }
                 else
                     return false;
             }
 
             //if everything went fine, persist possibleCoordinates on map
-            possibleCoordinates.ForEach(c => Field[c] = CellState.ShipDeck);
+            possibleCoordinates.ForEach(c => Field[c] = new Cell { State = CellState.ShipDeck, Coordinate = c, ShipId = ship.Id });
 
             //add ship to collection
             _ships.Add(ship);
 
-            //create an id for the ship
             return true;
         }
 
         private readonly IEnumerable<Ship> _shipsDefaultCollection = new List<Ship>
         {
-            new Ship(Type.FourDeck),
-            new Ship(Type.FourDeck),
-            new Ship(Type.ThreeDeck),
-            new Ship(Type.ThreeDeck),
-            new Ship(Type.ThreeDeck),
-            new Ship(Type.TwoDeck),
-            new Ship(Type.TwoDeck),
-            new Ship(Type.TwoDeck),
-            new Ship(Type.OneDeck),
-            new Ship(Type.OneDeck),
-            new Ship(Type.OneDeck),
-            new Ship(Type.OneDeck)
+            new Ship(ShipType.FourDeck),
+            new Ship(ShipType.FourDeck),
+            new Ship(ShipType.ThreeDeck),
+            new Ship(ShipType.ThreeDeck),
+            new Ship(ShipType.ThreeDeck),
+            new Ship(ShipType.TwoDeck),
+            new Ship(ShipType.TwoDeck),
+            new Ship(ShipType.TwoDeck),
+            new Ship(ShipType.OneDeck),
+            new Ship(ShipType.OneDeck),
+            new Ship(ShipType.OneDeck),
+            new Ship(ShipType.OneDeck)
         };
 
         #endregion
@@ -140,5 +150,10 @@ namespace BattleSea.Models
     {
         public Coordinate Coordinate { get; set; }
         public CellState Result { get; set; }
+    }
+
+    public class ShipDestroyedEventArgs : EventArgs
+    {
+        public Ship Ship { get; set; }
     }
 }

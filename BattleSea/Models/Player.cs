@@ -33,7 +33,7 @@ namespace BattleSea.Models
             //hide battlefield ships
             var allCells = BattleField.Field.AsSingleCollection();
             var censoredBattleField = new BattleField(_fieldSize);
-            allCells.ForEach(c => censoredBattleField.Field[c.Coordinate] = c.State == CellState.ShipDeck ? CellState.Empty : c.State);
+            allCells.ForEach(c => censoredBattleField.Field[c.Coordinate] = c.State == CellState.ShipDeck ? new Cell { Coordinate = c.Coordinate, State = CellState.Empty } : c);
             return new Player(_fieldSize)
             {
                 Id = Id,
