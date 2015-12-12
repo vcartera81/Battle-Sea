@@ -71,7 +71,21 @@ namespace BattleSea.Models
 
                     //invoke ship destroyed event
                     if (targetShip.ShipState == ShipState.Destroyed)
-                        ShipDestroyed?.Invoke(this, new ShipDestroyedEventArgs { Ship = targetShip });
+                    {
+                        var surroundedCells = new List<Cell>();
+                        //mark nearby cells as surrounded
+                        GetSurroundedCoordinates(targetShip).ForEach(c =>
+                        {
+                            var cell = Field[c];
+                            if (cell.State == CellState.Shot) cell.State = CellState.ShotAndSurrounded;
+                            else if (cell.State == CellState.Empty) cell.State = CellState.Surrounded;
+                            Field[c] = cell;
+                            surroundedCells.Add(cell);
+                        });
+
+                        //invoke
+                        ShipDestroyed?.Invoke(this, new ShipDestroyedEventArgs { Ship = targetShip, SurroundedCells = surroundedCells });
+                    }
                     break;
                 case CellState.Empty:
                     Field[coordinate] = new Cell { State = CellState.Shot, Coordinate = coordinate };
@@ -88,6 +102,25 @@ namespace BattleSea.Models
             Fired?.Invoke(this, new FiredEventArgs { Coordinate = coordinate, Result = Field[coordinate].State });
 
             return Field[coordinate];
+        }
+
+        public IEnumerable<Coordinate> GetSurroundedCoordinates(Ship ship)
+        {
+            var result = new List<Coordinate>();
+            var shipCoordinates = ship.GetCoordinates();
+            foreach (var shipCoord in shipCoordinates)
+            {
+                var mutableCoordinate = Coordinate.Copy(shipCoord);
+                if (Field.ValidateCoordinate(mutableCoordinate.DecreaseRow())) result.Add(Coordinate.Copy(mutableCoordinate));
+                if (Field.ValidateCoordinate(mutableCoordinate.IncreaseColumn())) result.Add(Coordinate.Copy(mutableCoordinate));
+                if (Field.ValidateCoordinate(mutableCoordinate.IncreaseRow())) result.Add(Coordinate.Copy(mutableCoordinate));
+                if (Field.ValidateCoordinate(mutableCoordinate.IncreaseRow())) result.Add(Coordinate.Copy(mutableCoordinate));
+                if (Field.ValidateCoordinate(mutableCoordinate.DecreaseColumn())) result.Add(Coordinate.Copy(mutableCoordinate));
+                if (Field.ValidateCoordinate(mutableCoordinate.DecreaseColumn())) result.Add(Coordinate.Copy(mutableCoordinate));
+                if (Field.ValidateCoordinate(mutableCoordinate.DecreaseRow())) result.Add(Coordinate.Copy(mutableCoordinate));
+                if (Field.ValidateCoordinate(mutableCoordinate.DecreaseRow())) result.Add(Coordinate.Copy(mutableCoordinate));
+            }
+            return result.Where(c => !shipCoordinates.Contains(c)).Distinct().ToList();
         }
 
         #endregion
@@ -155,5 +188,6 @@ namespace BattleSea.Models
     public class ShipDestroyedEventArgs : EventArgs
     {
         public Ship Ship { get; set; }
+        public IEnumerable<Cell> SurroundedCells { get; set; }
     }
 }

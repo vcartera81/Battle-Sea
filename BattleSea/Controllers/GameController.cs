@@ -1,4 +1,5 @@
 ﻿using System;
+using System.Collections.Generic;
 using System.Web.Mvc;
 using BattleSea.Models;
 using BattleSea.Models.Enums;
@@ -9,6 +10,15 @@ namespace BattleSea.Controllers
 {
     public class GameController : GameContext
     {
+        public GameController()
+        {
+            //subscribe to ship destroyed event
+            Game.FirstPlayer.BattleField.ShipDestroyed += FirstPlayerBattleFieldOnShipDestroyed;
+            Game.SecondPlayer.BattleField.ShipDestroyed += SecondPlayerBattleFieldOnShipDestroyed;
+        }
+
+        private readonly IHubContext _hubContext = GlobalHost.ConnectionManager.GetHubContext<BattleSeaHub>();
+
         public ActionResult Index(Guid id, Guid playerId)
         {
             if (id != Game.Id)
@@ -42,8 +52,7 @@ namespace BattleSea.Controllers
             var fireResult = Game.GetPlayerById(PlayerId, true).BattleField.Fire(coordinate);
 
             var srConnections = Game.GetPlayerById(PlayerId, true).GetSignalRConnections();
-            var srContext = GlobalHost.ConnectionManager.GetHubContext<BattleSeaHub>();
-            srConnections.ForEach(c => srContext
+            srConnections.ForEach(c => _hubContext
                 .Clients
                 .Client(c.ToString())
                 .opponentFire(new
@@ -54,13 +63,13 @@ namespace BattleSea.Controllers
 
             if (Game.Turn == Turn.FirstPlayer)
             {
-                Game.FirstPlayer.GetSignalRConnections().ForEach(c => srContext.Clients.Client(c.ToString()).unlockField());
-                Game.SecondPlayer.GetSignalRConnections().ForEach(c => srContext.Clients.Client(c.ToString()).lockField());
+                Game.FirstPlayer.GetSignalRConnections().ForEach(c => _hubContext.Clients.Client(c.ToString()).unlockField());
+                Game.SecondPlayer.GetSignalRConnections().ForEach(c => _hubContext.Clients.Client(c.ToString()).lockField());
             }
             else if (Game.Turn == Turn.SecondPlayer)
             {
-                Game.SecondPlayer.GetSignalRConnections().ForEach(c => srContext.Clients.Client(c.ToString()).unlockField());
-                Game.FirstPlayer.GetSignalRConnections().ForEach(c => srContext.Clients.Client(c.ToString()).lockField());
+                Game.SecondPlayer.GetSignalRConnections().ForEach(c => _hubContext.Clients.Client(c.ToString()).unlockField());
+                Game.FirstPlayer.GetSignalRConnections().ForEach(c => _hubContext.Clients.Client(c.ToString()).lockField());
             }
             
             return Json(fireResult);
@@ -77,6 +86,30 @@ namespace BattleSea.Controllers
         {
             SetPlayerSignalRConnectionId(connection);
             return new JsonResult();
+        }
+
+        private void FirstPlayerBattleFieldOnShipDestroyed(object sender, ShipDestroyedEventArgs shipDestroyedEventArgs)
+        {
+            SurroundDestroyedShip(Game.SecondPlayer, (BattleField)sender, shipDestroyedEventArgs.SurroundedCells);
+        }
+
+        private void SecondPlayerBattleFieldOnShipDestroyed(object sender, ShipDestroyedEventArgs shipDestroyedEventArgs)
+        {
+            SurroundDestroyedShip(Game.FirstPlayer, (BattleField)sender, shipDestroyedEventArgs.SurroundedCells);
+        }
+
+        private void SurroundDestroyedShip(Player player, BattleField battleField, IEnumerable<Cell> surroundedCells)
+        {
+            player.GetSignalRConnections().ForEach(c => _hubContext.Clients.Client(c.ToString()).surroundShip(surroundedCells));
+        }
+
+        protected override void Dispose(bool disposing)
+        {
+            //unsubscribe to ship destroyed event
+            Game.FirstPlayer.BattleField.ShipDestroyed -= FirstPlayerBattleFieldOnShipDestroyed;
+            Game.SecondPlayer.BattleField.ShipDestroyed -= SecondPlayerBattleFieldOnShipDestroyed;
+
+            base.Dispose(disposing);
         }
     }
 }

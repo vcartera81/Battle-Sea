@@ -5,6 +5,8 @@
         Empty,
         ShipDeck,
         Shot,
-        Exploded
+        Exploded,
+        Surrounded,
+        ShotAndSurrounded
     }
 }

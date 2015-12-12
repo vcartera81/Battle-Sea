@@ -36,18 +36,23 @@
             }
 
             /* Shot */
-            .battlefield-cell[data-value='2'] {
+            .battlefield-cell[data-value='2'], .battlefield-cell[data-value='5'] {
                 background-color: #5b6461;
             }
 
             /* Exploded */
-            .battlefield-cell[data-value='3'] {
-                background-color: #e15969;
-            }
+
+        .battlefield-cell[data-value='3'] {
+            background-color: #e15969;
+        }
 
         /*#mine {
             padding: 20px;
         }*/
+
+        .battlefield-cell[data-value='4'] {
+            background-color: #d1e8ff;
+        }
 
         .fieldArea {
             width: 100%;
@@ -73,11 +78,11 @@
             font-weight: 500;
         }
 
-            .span-button:hover {
-                background-color: #ccc;
-                color: white;
-                border: none;
-            }
+        .span-button:hover {
+            background-color: #ccc;
+            color: white;
+            border: none;
+        }
 
         .whom-label {
             position: absolute;
@@ -100,9 +105,9 @@
             cursor: pointer;
         }
 
-            .cell-selectable:hover {
-                opacity: 0.6;
-            }
+        .cell-selectable:hover {
+            opacity: 0.6;
+        }
     </style>
     <link href="https://fonts.googleapis.com/css?family=Roboto:400,500,400italic,500italic,700italic,700,900,900italic,300italic,300,100italic,100" rel="stylesheet" type="text/css">
     <script src="https://ajax.googleapis.com/ajax/libs/jquery/1.11.3/jquery.min.js"></script>
@@ -154,7 +159,7 @@
             $("#mine .battlefield-cell[data-column=" + fireResult.coordinate.Column + "][data-row=" + fireResult.coordinate.Row + "]").attr("data-value", fireResult.fireResult.State);
         };
 
-        $.connection.battleSeaHub.client.lockField = function() {
+        $.connection.battleSeaHub.client.lockField = function () {
             $("#theirs").animate({ "opacity": "0.5" }, 500);
             $(".tr-mesh").show();
         }
@@ -162,6 +167,12 @@
         $.connection.battleSeaHub.client.unlockField = function () {
             $("#theirs").animate({ "opacity": "1" }, 500);
             $(".tr-mesh").hide();
+        }
+
+        $.connection.battleSeaHub.client.surroundShip = function (sCells) {
+            $.each(sCells, function (index, item) {
+                $("#theirs .battlefield-cell[data-column=" + item.Coordinate.Column + "][data-row=" + item.Coordinate.Row + "]").attr("data-value", item.State);
+            });
         }
 
         var battleField;
@@ -219,7 +230,7 @@
         $(window).resize(function () {
             if (timeout) clearTimeout(timeout);
 
-            var timeout = setTimeout(function() {
+            var timeout = setTimeout(function () {
                 getBattlefieldAndRender();
             }, 2000);
         });

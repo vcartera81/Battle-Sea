@@ -2,7 +2,7 @@
 
 namespace BattleSea.Models
 {
-    public class Coordinate
+    public class Coordinate : IEquatable<Coordinate>
     {
         private char _column;
 
@@ -59,6 +59,18 @@ namespace BattleSea.Models
         public static Coordinate Copy(Coordinate source)
         {
             return new Coordinate(source.Column, source.Row);
+        }
+
+        public bool Equals(Coordinate other)
+        {
+            if (other == null) return false;
+            return this.Column == other.Column && this.Row == other.Row;
+        }
+
+        public override int GetHashCode()
+        {
+            var row = Row;
+            return (row ^ (int)(Column >> 32));
         }
     }
 }

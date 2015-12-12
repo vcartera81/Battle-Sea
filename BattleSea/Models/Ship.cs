@@ -1,4 +1,6 @@
 ﻿using System;
+using System.Collections.Generic;
+using System.Linq;
 
 namespace BattleSea.Models
 {
@@ -48,6 +50,21 @@ namespace BattleSea.Models
             if (_decksDestroyed < (int) _shipType)
                 _decksDestroyed++;
         }
+
+        public IEnumerable<Coordinate> GetCoordinates()
+        {
+            var startingPoint = Coordinate.Copy(StartingPoint);
+            var coordinates = new List<Coordinate>((int) _shipType);
+            for (var i = 0; i < (int)_shipType; i++)
+            {
+                coordinates.Add(Coordinate.Copy(startingPoint));
+                if (ShipOrientation == ShipOrientation.Horizontal)
+                    startingPoint.DecreaseColumn();
+                else
+                    startingPoint.DecreaseRow();
+            }
+            return coordinates;
+        } 
     }
 
     public enum ShipOrientation
