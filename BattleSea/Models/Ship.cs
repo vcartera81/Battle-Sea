@@ -59,9 +59,9 @@ namespace BattleSea.Models
             {
                 coordinates.Add(Coordinate.Copy(startingPoint));
                 if (ShipOrientation == ShipOrientation.Horizontal)
-                    startingPoint.DecreaseColumn();
+                    startingPoint.MoveRight();
                 else
-                    startingPoint.DecreaseRow();
+                    startingPoint.MoveDown();
             }
             return coordinates;
         } 

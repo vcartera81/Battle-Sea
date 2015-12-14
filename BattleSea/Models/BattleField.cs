@@ -111,14 +111,14 @@ namespace BattleSea.Models
             foreach (var shipCoord in shipCoordinates)
             {
                 var mutableCoordinate = Coordinate.Copy(shipCoord);
-                if (Field.ValidateCoordinate(mutableCoordinate.DecreaseRow())) result.Add(Coordinate.Copy(mutableCoordinate));
-                if (Field.ValidateCoordinate(mutableCoordinate.IncreaseColumn())) result.Add(Coordinate.Copy(mutableCoordinate));
-                if (Field.ValidateCoordinate(mutableCoordinate.IncreaseRow())) result.Add(Coordinate.Copy(mutableCoordinate));
-                if (Field.ValidateCoordinate(mutableCoordinate.IncreaseRow())) result.Add(Coordinate.Copy(mutableCoordinate));
-                if (Field.ValidateCoordinate(mutableCoordinate.DecreaseColumn())) result.Add(Coordinate.Copy(mutableCoordinate));
-                if (Field.ValidateCoordinate(mutableCoordinate.DecreaseColumn())) result.Add(Coordinate.Copy(mutableCoordinate));
-                if (Field.ValidateCoordinate(mutableCoordinate.DecreaseRow())) result.Add(Coordinate.Copy(mutableCoordinate));
-                if (Field.ValidateCoordinate(mutableCoordinate.DecreaseRow())) result.Add(Coordinate.Copy(mutableCoordinate));
+                if (Field.ValidateCoordinate(mutableCoordinate.MoveDown())) result.Add(Coordinate.Copy(mutableCoordinate));
+                if (Field.ValidateCoordinate(mutableCoordinate.MoveLeft())) result.Add(Coordinate.Copy(mutableCoordinate));
+                if (Field.ValidateCoordinate(mutableCoordinate.MoveUp())) result.Add(Coordinate.Copy(mutableCoordinate));
+                if (Field.ValidateCoordinate(mutableCoordinate.MoveUp())) result.Add(Coordinate.Copy(mutableCoordinate));
+                if (Field.ValidateCoordinate(mutableCoordinate.MoveRight())) result.Add(Coordinate.Copy(mutableCoordinate));
+                if (Field.ValidateCoordinate(mutableCoordinate.MoveRight())) result.Add(Coordinate.Copy(mutableCoordinate));
+                if (Field.ValidateCoordinate(mutableCoordinate.MoveDown())) result.Add(Coordinate.Copy(mutableCoordinate));
+                if (Field.ValidateCoordinate(mutableCoordinate.MoveDown())) result.Add(Coordinate.Copy(mutableCoordinate));
             }
             return result.Where(c => !shipCoordinates.Contains(c)).Distinct().ToList();
         }
@@ -143,9 +143,9 @@ namespace BattleSea.Models
                     possibleCoordinates[i] = Coordinate.Copy(startingPoint);
 
                     if (ship.ShipOrientation == ShipOrientation.Vertical)
-                        startingPoint.DecreaseRow();
+                        startingPoint.MoveDown();
                     else
-                        startingPoint.DecreaseColumn();
+                        startingPoint.MoveRight();
                 }
                 else
                     return false;

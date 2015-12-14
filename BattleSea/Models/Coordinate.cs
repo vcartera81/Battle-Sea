@@ -24,25 +24,25 @@ namespace BattleSea.Models
 
         public int Row { get; set; }
 
-        public Coordinate DecreaseColumn()
+        public Coordinate MoveRight()
         {
             _column++;
             return this;
         }
 
-        public Coordinate IncreaseColumn()
+        public Coordinate MoveLeft()
         {
             _column--;
             return this;
         }
 
-        public Coordinate IncreaseRow()
+        public Coordinate MoveUp()
         {
             Row--;
             return this;
         }
 
-        public Coordinate DecreaseRow()
+        public Coordinate MoveDown()
         {
             Row++;
             return this;

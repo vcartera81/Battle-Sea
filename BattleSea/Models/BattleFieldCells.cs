@@ -58,13 +58,13 @@ namespace BattleSea.Models
             };
 
             //move up
-            if (checker(coordinate.IncreaseRow())) return true;
-            if (checker(coordinate.IncreaseColumn())) return true;
-            if (checker(coordinate.DecreaseRow())) return true;
-            if (checker(coordinate.DecreaseRow())) return true;
-            if (checker(coordinate.DecreaseColumn())) return true;
-            if (checker(coordinate.DecreaseColumn())) return true;
-            return checker(coordinate.IncreaseRow()) || checker(coordinate.IncreaseRow());
+            if (checker(coordinate.MoveUp())) return true;
+            if (checker(coordinate.MoveLeft())) return true;
+            if (checker(coordinate.MoveDown())) return true;
+            if (checker(coordinate.MoveDown())) return true;
+            if (checker(coordinate.MoveRight())) return true;
+            if (checker(coordinate.MoveRight())) return true;
+            return checker(coordinate.MoveUp()) || checker(coordinate.MoveUp());
         }
 
         public IReadOnlyList<Cell> AsSingleCollection()
