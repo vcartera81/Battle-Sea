@@ -31,7 +31,6 @@ namespace BattleSea.Controllers
                 if (gameWithoutFirstPlayer != null)
                 {
                     gameWithoutFirstPlayer.FirstPlayer.InitPlayer();
-                    //gameWithoutFirstPlayer.FirstPlayer.BattleField.PlaceShipsRandomly();
                     PlayerId = gameWithoutFirstPlayer.FirstPlayer.Id;
                     System.Web.HttpContext.Current.Session["PlayerId"] = gameWithoutFirstPlayer.FirstPlayer.Id;
                     Game = gameWithoutFirstPlayer;
@@ -44,7 +43,6 @@ namespace BattleSea.Controllers
                 if (gameWithoutSecondPlayer != null)
                 {
                     gameWithoutSecondPlayer.SecondPlayer.InitPlayer();
-                    //gameWithoutSecondPlayer.SecondPlayer.BattleField.PlaceShipsRandomly();
                     PlayerId = gameWithoutSecondPlayer.SecondPlayer.Id;
                     System.Web.HttpContext.Current.Session["PlayerId"] = gameWithoutSecondPlayer.SecondPlayer.Id;
                     Game = gameWithoutSecondPlayer;

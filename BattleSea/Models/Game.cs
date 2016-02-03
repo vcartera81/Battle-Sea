@@ -7,22 +7,22 @@ namespace BattleSea.Models
     {
         public Guid Id { get; }
 
-        private readonly int _fieldSize;
+        public delegate void GameOverEventHandler(object sender, GameOverEventArgs e);
+        public event GameOverEventHandler GameOver;
+
+        public Player FirstPlayer { get; }
+        public Player SecondPlayer { get; }
 
         public Game(int fieldSize)
         {
             Id = Guid.NewGuid();
             FirstPlayer = new Player(fieldSize);
             SecondPlayer = new Player(fieldSize);
-            _fieldSize = fieldSize;
 
             //register event handlers
             FirstPlayer.BattleField.Fired += FirstPlayerOnFired;
             SecondPlayer.BattleField.Fired += SecondPlayerOnFired;
         }
-
-        public Player FirstPlayer { get; set; }
-        public Player SecondPlayer { get; set; }
 
         public GameState State { get; private set; }
 
@@ -52,14 +52,32 @@ namespace BattleSea.Models
         {
             if (e.Result != CellState.Exploded)
                 Turn = Turn.SecondPlayer;
+
+            CheckGameOver(SecondPlayer);
         }
 
         private void FirstPlayerOnFired(object sender, FiredEventArgs e)
         {
             if (e.Result != CellState.Exploded)
                 Turn = Turn.FirstPlayer;
+
+            CheckGameOver(FirstPlayer);
+        }
+
+        private void CheckGameOver(Player player)
+        {
+            if (player.BattleField.AllShipsDestroyed)
+                GameOver?.Invoke(this, new GameOverEventArgs { WinnerPlayer = GetPlayerById(player.Id, theOtherOne:true) });
+
+            //change state of the game
+            State = GameState.Finished;
         }
 
         #endregion
+    }
+
+    public class GameOverEventArgs
+    {
+        public Player WinnerPlayer { get; set; }
     }
 }

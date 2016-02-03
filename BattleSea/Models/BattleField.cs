@@ -32,6 +32,9 @@ namespace BattleSea.Models
 
         public IEnumerable<Ship> Ships => _ships;
 
+        public bool AllShipsDestroyed
+            => !_ships.Any(s => s.ShipState == ShipState.Clean || s.ShipState == ShipState.Wounded);
+
         public BattleField(int size)
         {
             _size = size;

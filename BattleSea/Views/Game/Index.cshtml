@@ -175,9 +175,12 @@
             });
         }
 
+        $.connection.battleSeaHub.client.endGame = function (isWinner) {
+            debugger;
+        }
+
         var battleField;
         var columnsArray = "ABCDEFGHIJKLMNOPQRSTUVWXYZ";
-        var deckSize = 50;
         var firstPlayerBattlefield = [];
         var secondPlayerBattlefield = [];
 
@@ -296,25 +299,6 @@
                 }
             });
         }
-
-        //var renderShips = function (wrapper, data) {
-        //    $.each(data, function(index, ship) {
-        //        var shipDiv = document.createElement("div");
-        //        $(shipDiv).attr({
-        //            "data-deck-size": ship.ShipType,
-        //            "class": "droppable-ship"
-        //        }).css({
-        //            "height": deckSize,
-        //            "width": deckSize * ship.ShipType
-        //        }).draggable({
-        //            revert: "invalid",
-        //            snap: true,
-        //            snapTolerance: 20
-        //        });
-
-        //        $(wrapper).append(shipDiv);
-        //    });
-        //}
     </script>
 </body>
 </html>

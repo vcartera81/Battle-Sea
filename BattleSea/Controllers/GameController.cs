@@ -15,6 +15,7 @@ namespace BattleSea.Controllers
             //subscribe to ship destroyed event
             Game.FirstPlayer.BattleField.ShipDestroyed += FirstPlayerBattleFieldOnShipDestroyed;
             Game.SecondPlayer.BattleField.ShipDestroyed += SecondPlayerBattleFieldOnShipDestroyed;
+            Game.GameOver += OnGameOver;
         }
 
         private readonly IHubContext _hubContext = GlobalHost.ConnectionManager.GetHubContext<BattleSeaHub>();
@@ -71,7 +72,7 @@ namespace BattleSea.Controllers
                 Game.SecondPlayer.GetSignalRConnections().ForEach(c => _hubContext.Clients.Client(c.ToString()).unlockField());
                 Game.FirstPlayer.GetSignalRConnections().ForEach(c => _hubContext.Clients.Client(c.ToString()).lockField());
             }
-            
+
             return Json(fireResult);
         }
 
@@ -98,6 +99,20 @@ namespace BattleSea.Controllers
             SurroundDestroyedShip(Game.FirstPlayer, (BattleField)sender, shipDestroyedEventArgs.SurroundedCells);
         }
 
+        private void OnGameOver(object sender, GameOverEventArgs gameOverEventArgs)
+        {
+            //notify player wins
+            gameOverEventArgs
+                .WinnerPlayer
+                .GetSignalRConnections()
+                .ForEach(c => _hubContext.Clients.Client(c.ToString()).endGame(true));
+
+            //notify player lose
+            Game.GetPlayerById(gameOverEventArgs.WinnerPlayer.Id, theOtherOne:true)
+                .GetSignalRConnections()
+                .ForEach(c => _hubContext.Clients.Client(c.ToString()).endGame(false));
+        }
+
         private void SurroundDestroyedShip(Player player, BattleField battleField, IEnumerable<Cell> surroundedCells)
         {
             player.GetSignalRConnections().ForEach(c => _hubContext.Clients.Client(c.ToString()).surroundShip(surroundedCells));
@@ -105,9 +120,10 @@ namespace BattleSea.Controllers
 
         protected override void Dispose(bool disposing)
         {
-            //unsubscribe to ship destroyed event
+            //unsubscribe from events
             Game.FirstPlayer.BattleField.ShipDestroyed -= FirstPlayerBattleFieldOnShipDestroyed;
             Game.SecondPlayer.BattleField.ShipDestroyed -= SecondPlayerBattleFieldOnShipDestroyed;
+            Game.GameOver -= OnGameOver;
 
             base.Dispose(disposing);
         }
