@@ -1,5 +1,6 @@
 ﻿using System;
 using BattleSea.Models.Enums;
+using BattleSea.Models.Exceptions;
 
 namespace BattleSea.Models
 {
@@ -30,10 +31,13 @@ namespace BattleSea.Models
 
         public void Start()
         {
-            if (State == GameState.Initialized)
-                State = GameState.Started;
-            else
+            if (State != GameState.Initialized)
                 throw new InvalidOperationException($"Cannot start the Game when it's state is {State}.");
+
+            if (!FirstPlayer.IsAvailable || !SecondPlayer.IsAvailable)
+                throw new InvalidGameStateException("Cannot start the Game without both players initialized.");
+
+            State = GameState.Started;
         }
 
         public Player GetPlayerById(Guid id, bool theOtherOne = false)

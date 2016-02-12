@@ -126,11 +126,7 @@ namespace BattleSea.Models
             return result.Where(c => !shipCoordinates.Contains(c)).Distinct().ToList();
         }
 
-        #endregion
-
-        #region PRIVATE
-
-        private bool PlaceShip(Ship ship)
+        public bool PlaceShip(Ship ship)
         {
             var decks = (int)ship.ShipType;
             var possibleCoordinates = new Coordinate[decks];
@@ -162,6 +158,10 @@ namespace BattleSea.Models
 
             return true;
         }
+
+        #endregion
+
+        #region PRIVATE
 
         private readonly IEnumerable<Ship> _shipsDefaultCollection = new List<Ship>
         {

@@ -167,6 +167,7 @@
     <Compile Include="Models\Cell.cs" />
     <Compile Include="Models\Enums\CellState.cs" />
     <Compile Include="Models\Coordinate.cs" />
+    <Compile Include="Models\Exceptions\InvalidGameStateException.cs" />
     <Compile Include="Models\Exceptions\InvalidShotException.cs" />
     <Compile Include="Models\Game.cs" />
     <Compile Include="Models\Enums\GameState.cs" />

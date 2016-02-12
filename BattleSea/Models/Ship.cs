@@ -1,19 +1,16 @@
 ﻿using System;
 using System.Collections.Generic;
-using System.Linq;
 
 namespace BattleSea.Models
 {
     public class Ship
     {
-        private readonly Guid _id;
         private readonly ShipType _shipType;
-        //private Coordinate[] _coordinates;
         private int _decksDestroyed = 0;
 
         public Ship()
         {
-            _id = Guid.NewGuid();
+            Id = Guid.NewGuid();
         }
 
         public Ship(ShipType shipType) : this()
@@ -21,7 +18,15 @@ namespace BattleSea.Models
             _shipType = shipType;
         }
 
-        public Guid Id => _id;
+        public Ship(ShipType shipType, ShipOrientation shipOrientation, Coordinate startingPoint)
+            : this(shipType)
+        {
+            ShipOrientation = shipOrientation;
+            StartingPoint = startingPoint;
+        }
+
+        public Guid Id { get; }
+
         public ShipOrientation ShipOrientation { get; set; }
         public ShipType ShipType => _shipType;
         public ShipState ShipState
