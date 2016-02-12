@@ -30,16 +30,32 @@ namespace BattleSea.Models
 
         public BattleFieldCells Field { get; private set; }
 
+        public IEnumerable<Ship> ShipsDefaultCollection { get; } = new List<Ship>
+        {
+            new Ship(ShipType.FourDeck),
+            new Ship(ShipType.FourDeck),
+            new Ship(ShipType.ThreeDeck),
+            new Ship(ShipType.ThreeDeck),
+            new Ship(ShipType.ThreeDeck),
+            new Ship(ShipType.TwoDeck),
+            new Ship(ShipType.TwoDeck),
+            new Ship(ShipType.TwoDeck),
+            new Ship(ShipType.OneDeck),
+            new Ship(ShipType.OneDeck),
+            new Ship(ShipType.OneDeck),
+            new Ship(ShipType.OneDeck)
+        };
+
         public IEnumerable<Ship> Ships => _ships;
 
         public bool AllShipsDestroyed
-            => !_ships.Any(s => s.ShipState == ShipState.Clean || s.ShipState == ShipState.Wounded);
+            => !_ships.Any(s => s.State == ShipState.Clean || s.State == ShipState.Wounded);
 
         public BattleField(int size)
         {
             _size = size;
             Field = new BattleFieldCells(size);
-            _ships = new List<Ship>(_shipsDefaultCollection.Count());
+            _ships = new List<Ship>(ShipsDefaultCollection.Count());
         }
 
         public void PlaceShipsRandomly()
@@ -47,7 +63,7 @@ namespace BattleSea.Models
             //wipe cells
             Field = new BattleFieldCells(_size);
 
-            foreach (var ship in _shipsDefaultCollection)
+            foreach (var ship in ShipsDefaultCollection)
             {
                 var cellsCollection = Field.AsSingleCollection().Where(c => !Field.ProximityCheck(c.Coordinate) && c.State != CellState.ShipDeck).ToList();
                 if (!cellsCollection.Any()) break;
@@ -73,7 +89,7 @@ namespace BattleSea.Models
                     targetShip.Shot();
 
                     //invoke ship destroyed event
-                    if (targetShip.ShipState == ShipState.Destroyed)
+                    if (targetShip.State == ShipState.Destroyed)
                     {
                         var surroundedCells = new List<Cell>();
                         //mark nearby cells as surrounded
@@ -128,7 +144,7 @@ namespace BattleSea.Models
 
         public bool PlaceShip(Ship ship)
         {
-            var decks = (int)ship.ShipType;
+            var decks = (int)ship.Type;
             var possibleCoordinates = new Coordinate[decks];
             var startingPoint = Coordinate.Copy(ship.StartingPoint);
 
@@ -141,7 +157,7 @@ namespace BattleSea.Models
                     if (Field.ProximityCheck(startingPoint)) return false;
                     possibleCoordinates[i] = Coordinate.Copy(startingPoint);
 
-                    if (ship.ShipOrientation == ShipOrientation.Vertical)
+                    if (ship.Orientation == ShipOrientation.Vertical)
                         startingPoint.MoveDown();
                     else
                         startingPoint.MoveRight();
@@ -162,22 +178,6 @@ namespace BattleSea.Models
         #endregion
 
         #region PRIVATE
-
-        private readonly IEnumerable<Ship> _shipsDefaultCollection = new List<Ship>
-        {
-            new Ship(ShipType.FourDeck),
-            new Ship(ShipType.FourDeck),
-            new Ship(ShipType.ThreeDeck),
-            new Ship(ShipType.ThreeDeck),
-            new Ship(ShipType.ThreeDeck),
-            new Ship(ShipType.TwoDeck),
-            new Ship(ShipType.TwoDeck),
-            new Ship(ShipType.TwoDeck),
-            new Ship(ShipType.OneDeck),
-            new Ship(ShipType.OneDeck),
-            new Ship(ShipType.OneDeck),
-            new Ship(ShipType.OneDeck)
-        };
 
         #endregion
     }

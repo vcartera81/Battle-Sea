@@ -5,7 +5,6 @@ namespace BattleSea.Models
 {
     public class Ship
     {
-        private readonly ShipType _shipType;
         private int _decksDestroyed = 0;
 
         public Ship()
@@ -13,30 +12,31 @@ namespace BattleSea.Models
             Id = Guid.NewGuid();
         }
 
-        public Ship(ShipType shipType) : this()
+        public Ship(ShipType type) : this()
         {
-            _shipType = shipType;
+            Type = type;
         }
 
-        public Ship(ShipType shipType, ShipOrientation shipOrientation, Coordinate startingPoint)
-            : this(shipType)
+        public Ship(ShipType type, ShipOrientation orientation, Coordinate startingPoint)
+            : this(type)
         {
-            ShipOrientation = shipOrientation;
+            Orientation = orientation;
             StartingPoint = startingPoint;
         }
 
         public Guid Id { get; }
 
-        public ShipOrientation ShipOrientation { get; set; }
-        public ShipType ShipType => _shipType;
-        public ShipState ShipState
+        public ShipOrientation Orientation { get; set; }
+        public ShipType Type { get; }
+
+        public ShipState State
         {
             get
             {
                 if (_decksDestroyed == 0)
                     return ShipState.Clean;
 
-                return _decksDestroyed < (int)_shipType 
+                return _decksDestroyed < (int)Type 
                     ? ShipState.Wounded 
                     : ShipState.Destroyed;
             }
@@ -47,23 +47,23 @@ namespace BattleSea.Models
         public void SetRandomOrientation(Random random)
         {
             var values = Enum.GetValues(typeof(ShipOrientation));
-            ShipOrientation = (ShipOrientation)values.GetValue(random.Next(values.Length));
+            Orientation = (ShipOrientation)values.GetValue(random.Next(values.Length));
         }
 
         public void Shot()
         {
-            if (_decksDestroyed < (int) _shipType)
+            if (_decksDestroyed < (int) Type)
                 _decksDestroyed++;
         }
 
         public IEnumerable<Coordinate> GetCoordinates()
         {
             var startingPoint = Coordinate.Copy(StartingPoint);
-            var coordinates = new List<Coordinate>((int) _shipType);
-            for (var i = 0; i < (int)_shipType; i++)
+            var coordinates = new List<Coordinate>((int) Type);
+            for (var i = 0; i < (int)Type; i++)
             {
                 coordinates.Add(Coordinate.Copy(startingPoint));
-                if (ShipOrientation == ShipOrientation.Horizontal)
+                if (Orientation == ShipOrientation.Horizontal)
                     startingPoint.MoveRight();
                 else
                     startingPoint.MoveDown();
