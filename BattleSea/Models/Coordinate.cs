@@ -64,13 +64,18 @@ namespace BattleSea.Models
         public bool Equals(Coordinate other)
         {
             if (other == null) return false;
-            return this.Column == other.Column && this.Row == other.Row;
+            return Column == other.Column && Row == other.Row;
         }
 
         public override int GetHashCode()
         {
             var row = Row;
             return (row ^ (int)(Column >> 32));
+        }
+
+        public override string ToString()
+        {
+            return $"{Column}-{Row}";
         }
     }
 }

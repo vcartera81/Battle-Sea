@@ -93,7 +93,7 @@ namespace BattleSea.Models
                     {
                         var surroundedCells = new List<Cell>();
                         //mark nearby cells as surrounded
-                        GetSurroundedCoordinates(targetShip).ForEach(c =>
+                        GetSurroundedCoordinatesOfTheShip(targetShip).ForEach(c =>
                         {
                             var cell = Field[c];
                             if (cell.State == CellState.Shot) cell.State = CellState.ShotAndSurrounded;
@@ -123,7 +123,7 @@ namespace BattleSea.Models
             return Field[coordinate];
         }
 
-        public IEnumerable<Coordinate> GetSurroundedCoordinates(Ship ship)
+        public IEnumerable<Coordinate> GetSurroundedCoordinatesOfTheShip(Ship ship)
         {
             var result = new List<Coordinate>();
             var shipCoordinates = ship.GetCoordinates();

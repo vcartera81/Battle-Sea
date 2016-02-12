@@ -51,6 +51,7 @@
   </Choose>
   <ItemGroup>
     <Compile Include="BattlefieldTest.cs" />
+    <Compile Include="CoordinateTest.cs" />
     <Compile Include="GameTest.cs" />
     <Compile Include="PlayerTest.cs" />
     <Compile Include="Properties\AssemblyInfo.cs" />
