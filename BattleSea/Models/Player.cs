@@ -28,7 +28,7 @@ namespace BattleSea.Models
 
         public BattleField BattleField { get; }
 
-        public Player ObfuscateBattlefield()
+        public Player GetObfuscatedBattlefield()
         {
             //hide battlefield ships
             var allCells = BattleField.Field.AsSingleCollection();
