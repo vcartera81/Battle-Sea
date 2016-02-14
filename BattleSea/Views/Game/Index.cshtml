@@ -120,30 +120,45 @@
     <script src="http://ajax.googleapis.com/ajax/libs/angularjs/1.0.4/angular.js">
     </script>
 </head>
-<body ng-app="battleSea">
-    <div class="battle" ng-controller="seaBattleController">
+<body ng-app="battleSea" ng-controller="seaBattleController">
+    <div class="battle">
         <div class="section" id="mine">
             <span class="whom-label">You</span>
             <div class="fieldArea">
-
+                <div ng-repeat="cell in unpackedCells(model.You.BattleField.Field.Cells)"
+                     class="battlefield-cell"
+                     style="height: {{cellSize}}px;
+                            width: {{cellSize}}px;
+                            margin-left: {{getMarginLeft(cell)}}px;
+                            margin-top: {{getMarginTop(cell)}}px;"
+                     data-value="{{cell.State}}"
+                     data-row="{{cell.Coordinate.Row}}"
+                     data-column="{{cell.Coordinate.Column}}"></div>
             </div>
             @if (Model.State == GameState.Initialized)
             {
-                <span id="shuffleBtn" onclick="shuffleShips()" class="span-button" style="position: absolute; bottom: 0; margin-left: 40%;">Reposition</span>
+                <span ng-click="shuffleShips()" class="span-button" style="position: absolute; bottom: 0; margin-left: 40%;">Reposition</span>
             }
         </div>
         <div class="section" id="theirs">
             <div class="tr-mesh" style="display: none;"></div>
             <span class="whom-label">Opponent</span>
             <div class="fieldArea">
-
+                <div ng-repeat="cell in unpackedCells(model.Opponent.BattleField.Field.Cells)"
+                     class="battlefield-cell"
+                     ng-class="{ 'cell-selectable': model.State == 1 }"
+                     style="height: {{cellSize}}px;
+                            width: {{cellSize}}px;
+                            margin-left: {{getMarginLeft(cell)}}px;
+                            margin-top: {{getMarginTop(cell)}}px;"
+                     ng-click="fire($event)"
+                     data-value="{{cell.State}}"
+                     data-row="{{cell.Coordinate.Row}}"
+                     data-column="{{cell.Coordinate.Column}}"></div>
             </div>
         </div>
     </div>
-    @if (Model.State == GameState.Initialized)
-    {
-        <span id="startGameBtn" class="span-button" onclick="startGame()" style="display: inline-block; margin-left: 49%; position: absolute;">Start game!</span>
-    }
+    <span class="span-button" ng-show="model.State == 0" ng-click="startGame()" style="display: inline-block; margin-left: 49%; position: absolute;">Start game!</span>
 
     <script type="text/javascript">
         $.connection.hub.start().done(function (hub) {
@@ -178,15 +193,65 @@
         }
 
         $.connection.battleSeaHub.client.endGame = function (isWinner) {
-            debugger;
+            //debugger;
         }
 
         var battleSea = angular.module("battleSea", []);
 
         battleSea.controller("seaBattleController", ["$scope", "$http", function ($scope, $http) {
-            $http.post("@Url.Action("GetCurrentBattlefield")").then(function (data) {
-                debugger;
-            });
+            var loadModel = function () {
+                $http.post("@Url.Action("GetCurrentBattlefield")").then(function (data) {
+                    $scope.model = data.data;
+                    $scope.cellSize = $(".fieldArea").height() / $scope.model.You.BattleField.Field.Cells.length;
+                    $scope.cellsLeftOffset = ($(".fieldArea").width() - ($scope.cellSize * $scope.model.You.BattleField.Field.Cells.length)) / 2;
+                });
+            };
+
+            loadModel();
+
+            var getColumnIndex = function (char) {
+                return char.charCodeAt(0) - 65
+            }
+
+            $scope.unpackedCells = function (collection) {
+                if (!$scope.model) return [];
+                var unpacked = [];
+                angular.forEach(collection, function (value, key) {
+                    angular.forEach(value, function (v, k) {
+                        unpacked.push(v);
+                    });
+                });
+                return unpacked;
+            }
+
+            $scope.getMarginLeft = function (cell) {
+                return getColumnIndex(cell.Coordinate.Column) * $scope.cellSize + $scope.cellsLeftOffset;
+            }
+
+            $scope.getMarginTop = function (cell) {
+                return cell.Coordinate.Row * $scope.cellSize;
+            }
+
+            $scope.shuffleShips = function () {
+                $http.post("@Url.Action("ShuffleShips")").then(function () {
+                    loadModel();
+                });
+            }
+
+            $scope.startGame = function () {
+                $http.post("@Url.Action("Start")").then(function () {
+                    loadModel();
+                });
+            }
+
+            $scope.fire = function (e) {
+                $http.post("@Url.Action("Fire")", {
+                    Column: $(e.target).attr("data-column"),
+                    Row: $(e.target).attr("data-row")
+                }).then(function () {
+                    loadModel();
+                });
+            }
         }]);
     </script>
 </body>
