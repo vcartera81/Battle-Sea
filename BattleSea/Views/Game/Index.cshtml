@@ -42,17 +42,17 @@
 
             /* Exploded */
 
-        .battlefield-cell[data-value='3'] {
-            background-color: #e15969;
-        }
+            .battlefield-cell[data-value='3'] {
+                background-color: #e15969;
+            }
 
-        /*#mine {
+            /*#mine {
             padding: 20px;
         }*/
 
-        .battlefield-cell[data-value='4'] {
-            background-color: #d1e8ff;
-        }
+            .battlefield-cell[data-value='4'] {
+                background-color: #d1e8ff;
+            }
 
         .fieldArea {
             width: 100%;
@@ -78,11 +78,11 @@
             font-weight: 500;
         }
 
-        .span-button:hover {
-            background-color: #ccc;
-            color: white;
-            border: none;
-        }
+            .span-button:hover {
+                background-color: #ccc;
+                color: white;
+                border: none;
+            }
 
         .whom-label {
             position: absolute;
@@ -105,9 +105,9 @@
             cursor: pointer;
         }
 
-        .cell-selectable:hover {
-            opacity: 0.6;
-        }
+            .cell-selectable:hover {
+                opacity: 0.6;
+            }
     </style>
     <link href="https://fonts.googleapis.com/css?family=Roboto:400,500,400italic,500italic,700italic,700,900,900italic,300italic,300,100italic,100" rel="stylesheet" type="text/css">
     <script src="https://ajax.googleapis.com/ajax/libs/jquery/1.11.3/jquery.min.js"></script>
@@ -116,10 +116,12 @@
     <script src="/signalr/hubs"></script>
 
     <link rel="stylesheet" href="https://ajax.googleapis.com/ajax/libs/jqueryui/1.11.4/themes/smoothness/jquery-ui.css">
-    <script src="https://ajax.googleapis.com/ajax/libs/jqueryui/1.11.4/jquery-ui.min.js"></script>
+    @*<script src="https://ajax.googleapis.com/ajax/libs/jqueryui/1.11.4/jquery-ui.min.js"></script>*@
+    <script src="http://ajax.googleapis.com/ajax/libs/angularjs/1.0.4/angular.js">
+    </script>
 </head>
-<body>
-    <div class="battle">
+<body ng-app="battleSea">
+    <div class="battle" ng-controller="seaBattleController">
         <div class="section" id="mine">
             <span class="whom-label">You</span>
             <div class="fieldArea">
@@ -179,126 +181,13 @@
             debugger;
         }
 
-        var battleField;
-        var columnsArray = "ABCDEFGHIJKLMNOPQRSTUVWXYZ";
-        var firstPlayerBattlefield = [];
-        var secondPlayerBattlefield = [];
+        var battleSea = angular.module("battleSea", []);
 
-        var getBattlefieldAndRender = function () {
-            $.ajax({
-                type: "POST",
-                url: "@Url.Action("GetCurrentBattlefield")",
-                data: {},
-                dataType: "json",
-                contentType: "application/json; charset=utf-8",
-                success: function (response) {
-                    firstPlayerBattlefield = response.You.BattleField.Field.Cells;
-                    secondPlayerBattlefield = response.Opponent.BattleField.Field.Cells;
-
-                    renderField($("#mine .fieldArea"), firstPlayerBattlefield);
-                    renderField($("#theirs .fieldArea"), secondPlayerBattlefield);
-
-                    @if (Model.State == GameState.Started)
-                {
-                    <text>activateCells();</text>
-                    }
-                }
+        battleSea.controller("seaBattleController", ["$scope", "$http", function ($scope, $http) {
+            $http.post("@Url.Action("GetCurrentBattlefield")").then(function (data) {
+                debugger;
             });
-        };
-
-        var shuffleShips = function () {
-            $.ajax({
-                type: "POST",
-                url: "@Url.Action("ShuffleShips")",
-                data: {},
-                success: function (d) {
-                    getBattlefieldAndRender();
-                }
-            });
-        }
-
-        var startGame = function () {
-            $.ajax({
-                type: "POST",
-                url: "@Url.Action("Start")",
-                data: {},
-                success: function (d) {
-                    $("#startGameBtn").remove();
-                    $("#shuffleBtn").remove();
-                    activateCells();
-                }
-            });
-        }
-
-        $(window).resize(function () {
-            if (timeout) clearTimeout(timeout);
-
-            var timeout = setTimeout(function () {
-                getBattlefieldAndRender();
-            }, 2000);
-        });
-
-        $(document).ready(function () {
-            getBattlefieldAndRender();
-        });
-
-        var renderField = function (wrapper, data) {
-            $(wrapper).empty();
-
-            var cellSize = $(wrapper).width() / data.length;
-            if (cellSize * data.length > $(wrapper).height())
-                cellSize = $(wrapper).height() / data.length;
-
-            var cellsLeftOffset = ($(wrapper).width() - (cellSize * data.length)) / 2;
-
-            $.each(data, function (rowIndex, row) {
-                $.each(row, function (columnIndex, cellValue) {
-                    var cell = document.createElement("div");
-                    $(cell).css({
-                        "height": cellSize,
-                        "width": cellSize,
-                        "margin-left": columnIndex * cellSize + cellsLeftOffset,
-                        "margin-top": rowIndex * cellSize
-                    }).attr({
-                        "class": "battlefield-cell",
-                        "data-value": cellValue.State,
-                        "data-row": rowIndex,
-                        "data-column": columnsArray[columnIndex]
-                    });
-
-                    $(wrapper).append(cell);
-                });
-            });
-        }
-
-        var activateCells = function () {
-            //set cells selectable
-            $("#theirs .battlefield-cell").each(function () {
-                $(this).addClass("cell-selectable");
-            });
-
-            $("#theirs .battlefield-cell").click(function () {
-                //fire
-                var that = $(this);
-                if ($(this).attr("data-value") == "0") {
-                    $.ajax({
-                        type: "POST",
-                        url: "@Url.Action("Fire")",
-                        data: JSON.stringify({
-                            coordinate: {
-                                Column: $(this).attr("data-column"),
-                                Row: $(this).attr("data-row")
-                            }
-                        }),
-                        dataType: "json",
-                        contentType: "application/json; charset=utf-8",
-                        success: function (response) {
-                            $(that).attr("data-value", response.State);
-                        }
-                    });
-                }
-            });
-        }
+        }]);
     </script>
 </body>
 </html>
