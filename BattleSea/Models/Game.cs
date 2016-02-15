@@ -29,6 +29,8 @@ namespace BattleSea.Models
 
         public Turn Turn { get; private set; }
 
+        public Guid TurnPlayerId { get; private set; }
+
         public void Start()
         {
             if (State != GameState.Initialized)
@@ -38,6 +40,7 @@ namespace BattleSea.Models
                 throw new InvalidGameStateException("Cannot start the Game without both players initialized.");
 
             State = GameState.Started;
+            TurnPlayerId = FirstPlayer.Id;
         }
 
         public Player GetPlayerById(Guid id, bool theOtherOne = false)
@@ -55,7 +58,10 @@ namespace BattleSea.Models
         private void SecondPlayerOnFired(object sender, FiredEventArgs e)
         {
             if (e.Result != CellState.Exploded)
+            {
                 Turn = Turn.SecondPlayer;
+                TurnPlayerId = SecondPlayer.Id;
+            }
 
             CheckGameOver(SecondPlayer);
         }
@@ -63,7 +69,10 @@ namespace BattleSea.Models
         private void FirstPlayerOnFired(object sender, FiredEventArgs e)
         {
             if (e.Result != CellState.Exploded)
+            {
                 Turn = Turn.FirstPlayer;
+                TurnPlayerId = FirstPlayer.Id;
+            }
 
             CheckGameOver(FirstPlayer);
         }
@@ -71,10 +80,12 @@ namespace BattleSea.Models
         private void CheckGameOver(Player player)
         {
             if (player.BattleField.AllShipsDestroyed)
-                GameOver?.Invoke(this, new GameOverEventArgs { WinnerPlayer = GetPlayerById(player.Id, theOtherOne:true) });
+            {
+                GameOver?.Invoke(this, new GameOverEventArgs { WinnerPlayer = GetPlayerById(player.Id, theOtherOne: true) });
 
-            //change state of the game
-            State = GameState.Finished;
+                //change state of the game
+                State = GameState.Finished;
+            }
         }
 
         #endregion

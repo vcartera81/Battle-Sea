@@ -99,6 +99,9 @@
             height: 100%;
             position: absolute;
             z-index: 55;
+            -webkit-transition: all linear 0.5s;
+            transition: all linear 0.5s;
+            background-color: rgba(255, 255, 255, 0.3);
         }
 
         .cell-selectable {
@@ -123,6 +126,7 @@
 <body ng-app="battleSea" ng-controller="seaBattleController">
     <div class="battle">
         <div class="section" id="mine">
+            <div class="tr-mesh" ng-show="model.YourTurn && model.State != 2"></div>
             <span class="whom-label">You</span>
             <div class="fieldArea">
                 <div ng-repeat="cell in unpackedCells(model.You.BattleField.Field.Cells)"
@@ -141,7 +145,7 @@
             }
         </div>
         <div class="section" id="theirs">
-            <div class="tr-mesh" style="display: none;"></div>
+            <div class="tr-mesh" ng-show="!model.YourTurn && model.State != 2"></div>
             <span class="whom-label">Opponent</span>
             <div class="fieldArea">
                 <div ng-repeat="cell in unpackedCells(model.Opponent.BattleField.Field.Cells)"
@@ -159,46 +163,15 @@
         </div>
     </div>
     <span class="span-button" ng-show="model.State == 0" ng-click="startGame()" style="display: inline-block; margin-left: 49%; position: absolute;">Start game!</span>
+    <div ng-show="model.State == 2" style="position: fixed; width: 100%; height: 100%; top: 0; left: 0; background-color: rgba(255,255, 255, 0.5);">
+        <span style="font-size: 18px; position: absolute; top: 50%; width: 100%; text-align: center;">Game over!<br />You {{gameOverResultWord}}!</span>
+    </div>
 
     <script type="text/javascript">
-        $.connection.hub.start().done(function (hub) {
-            //register player
-            $.ajax({
-                type: "POST",
-                url: "@Url.Action("RegisterPlayer")",
-                data: JSON.stringify({ connection: hub.id }),
-                dataType: "json",
-                contentType: "application/json; charset=utf-8"
-            });
-        });
-
-        $.connection.battleSeaHub.client.opponentFire = function (fireResult) {
-            $("#mine .battlefield-cell[data-column=" + fireResult.coordinate.Column + "][data-row=" + fireResult.coordinate.Row + "]").attr("data-value", fireResult.fireResult.State);
-        };
-
-        $.connection.battleSeaHub.client.lockField = function () {
-            $("#theirs").animate({ "opacity": "0.5" }, 500);
-            $(".tr-mesh").show();
-        }
-
-        $.connection.battleSeaHub.client.unlockField = function () {
-            $("#theirs").animate({ "opacity": "1" }, 500);
-            $(".tr-mesh").hide();
-        }
-
-        $.connection.battleSeaHub.client.surroundShip = function (sCells) {
-            $.each(sCells, function (index, item) {
-                $("#theirs .battlefield-cell[data-column=" + item.Coordinate.Column + "][data-row=" + item.Coordinate.Row + "]").attr("data-value", item.State);
-            });
-        }
-
-        $.connection.battleSeaHub.client.endGame = function (isWinner) {
-            //debugger;
-        }
 
         var battleSea = angular.module("battleSea", []);
 
-        battleSea.controller("seaBattleController", ["$scope", "$http", function ($scope, $http) {
+        battleSea.controller("seaBattleController", ["$scope", "$http", "SRCallbacks", function ($scope, $http, srCallbacks) {
             var loadModel = function () {
                 $http.post("@Url.Action("GetCurrentBattlefield")").then(function (data) {
                     $scope.model = data.data;
@@ -252,7 +225,63 @@
                     loadModel();
                 });
             }
+
+            //-- signal R callbacks
+            $scope.$on("opponentFire", function (event, args) {
+                $scope.model.You.BattleField.Field.Cells[args.coordinate.Row][getColumnIndex(args.coordinate.Column)] = args.fireResult;
+                $scope.$apply();
+            });
+
+            $scope.$on("lockField", function () {
+                $scope.model.YourTurn = false;
+                $scope.$apply();
+            });
+
+            $scope.$on("unlockField", function () {
+                $scope.model.YourTurn = true;
+                $scope.$apply();
+            });
+
+            $scope.$on("endGame", function (event, isWinner) {
+                $scope.gameOverResultWord = isWinner ? "win" : "loose";
+                $scope.model.State = 2;
+                $scope.$apply();
+            });
         }]);
+
+        battleSea.service("SRCallbacks", ["$rootScope", function ($rootScope) {
+            $.connection.hub.start().done(function (hub) {
+                //register player
+                $.ajax({
+                    type: "POST",
+                    url: "@Url.Action("RegisterPlayer")",
+                    data: JSON.stringify({ connection: hub.id }),
+                    dataType: "json",
+                    contentType: "application/json; charset=utf-8"
+                });
+            });
+
+            $.connection.battleSeaHub.client.opponentFire = function (fireResult) {
+                $rootScope.$broadcast("opponentFire", fireResult);
+            };
+
+            $.connection.battleSeaHub.client.lockField = function () {
+                $rootScope.$broadcast("lockField");
+            }
+
+            $.connection.battleSeaHub.client.unlockField = function () {
+                $rootScope.$broadcast("unlockField");
+            }
+
+            $.connection.battleSeaHub.client.surroundShip = function (sCells) {
+
+            }
+
+            $.connection.battleSeaHub.client.endGame = function (isWinner) {
+                $rootScope.$broadcast("endGame", isWinner);
+            }
+        }]);
+
     </script>
 </body>
 </html>

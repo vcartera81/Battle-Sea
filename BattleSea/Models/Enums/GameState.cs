@@ -2,9 +2,9 @@
 {
     public enum GameState
     {
-        Initialized,
-        Started,
-        Finished,
-        Abandoned
+        Initialized = 0,
+        Started = 1,
+        Finished = 2,
+        Abandoned = 3
     }
 }

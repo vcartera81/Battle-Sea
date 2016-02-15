@@ -23,7 +23,9 @@ namespace BattleSea.Controllers
             if (System.Web.HttpContext.Current.Session["PlayerId"] == null)
             {
                 if (Games.Any(g => !g.FirstPlayer.IsAvailable && !g.SecondPlayer.IsAvailable) || !Games.Any())
-                    InitGame();
+                {
+                    Game = InitGame();
+                }
 
                 var gameWithoutFirstPlayer =
                     Games.FirstOrDefault(g => !g.FirstPlayer.IsAvailable);
@@ -60,10 +62,11 @@ namespace BattleSea.Controllers
             Game.GetPlayerById(PlayerId).RegisterSignalRConnection(connection);
         }
 
-        private static void InitGame()
+        private static Game InitGame()
         {
             var game = new Game(10);
             Games.Add(game);
+            return game;
         }
     }
 }

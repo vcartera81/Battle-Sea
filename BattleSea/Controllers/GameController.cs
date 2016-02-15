@@ -36,7 +36,8 @@ namespace BattleSea.Controllers
                 State = Game.State,
                 PlayerId = PlayerId,
                 You = Game.GetPlayerById(PlayerId),
-                Opponent = Game.GetPlayerById(PlayerId, true).GetObfuscatedBattlefield()
+                Opponent = Game.GetPlayerById(PlayerId, true).GetObfuscatedBattlefield(),
+                YourTurn = Game.TurnPlayerId == PlayerId
             });
         }
 

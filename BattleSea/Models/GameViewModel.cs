@@ -12,5 +12,7 @@ namespace BattleSea.Models
         public Player Opponent { get; set; }
 
         public GameState State { get; set; }
+
+        public bool YourTurn { get; set; }
     }
 }
