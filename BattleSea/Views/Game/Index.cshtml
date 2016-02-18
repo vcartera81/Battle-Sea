@@ -101,7 +101,7 @@
             z-index: 55;
             -webkit-transition: all linear 0.5s;
             transition: all linear 0.5s;
-            background-color: rgba(255, 255, 255, 0.3);
+            background-color: rgba(0, 0, 0, 0.3);
         }
 
         .cell-selectable {
@@ -175,12 +175,16 @@
             var loadModel = function () {
                 $http.post("@Url.Action("GetCurrentBattlefield")").then(function (data) {
                     $scope.model = data.data;
-                    $scope.cellSize = $(".fieldArea").height() / $scope.model.You.BattleField.Field.Cells.length;
-                    $scope.cellsLeftOffset = ($(".fieldArea").width() - ($scope.cellSize * $scope.model.You.BattleField.Field.Cells.length)) / 2;
+                    setCellSizeAndOffsets();
                 });
             };
 
             loadModel();
+
+            var setCellSizeAndOffsets = function () {
+                $scope.cellSize = $(".fieldArea").height() / $scope.model.You.BattleField.Field.Cells.length;
+                $scope.cellsLeftOffset = ($(".fieldArea").width() - ($scope.cellSize * $scope.model.You.BattleField.Field.Cells.length)) / 2;
+            }
 
             var getColumnIndex = function (char) {
                 return char.charCodeAt(0) - 65
@@ -247,18 +251,16 @@
                 $scope.model.State = 2;
                 $scope.$apply();
             });
+
+            $scope.$on("window-resize", function () {
+                setCellSizeAndOffsets();
+                $scope.$digest();
+            });
         }]);
 
-        battleSea.service("SRCallbacks", ["$rootScope", function ($rootScope) {
+        battleSea.service("SRCallbacks", ["$rootScope", "$http", "$window", function ($rootScope, $http, $window) {
             $.connection.hub.start().done(function (hub) {
-                //register player
-                $.ajax({
-                    type: "POST",
-                    url: "@Url.Action("RegisterPlayer")",
-                    data: JSON.stringify({ connection: hub.id }),
-                    dataType: "json",
-                    contentType: "application/json; charset=utf-8"
-                });
+                $http.post("@Url.Action("RegisterPlayer")", { connection: hub.id });
             });
 
             $.connection.battleSeaHub.client.opponentFire = function (fireResult) {
@@ -280,6 +282,10 @@
             $.connection.battleSeaHub.client.endGame = function (isWinner) {
                 $rootScope.$broadcast("endGame", isWinner);
             }
+
+            angular.element($window).on("resize", function () {
+                $rootScope.$broadcast("window-resize");
+            });
         }]);
 
     </script>
