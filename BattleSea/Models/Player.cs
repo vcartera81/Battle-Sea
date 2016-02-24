@@ -5,7 +5,7 @@ using WebGrease.Css.Extensions;
 
 namespace BattleSea.Models
 {
-    public class Player
+    public class Player : IEquatable<Player>
     {
         private readonly int _fieldSize;
         private readonly HashSet<Guid> _signalRConnections = new HashSet<Guid>();
@@ -49,9 +49,19 @@ namespace BattleSea.Models
             return _signalRConnections;
         }
 
-        public void InitPlayer()
+        public void Initialize()
         {
             Id = Guid.NewGuid();
+        }
+
+        public bool Equals(Player other)
+        {
+            return this.Id == other.Id;
+        }
+
+        public override int GetHashCode()
+        {
+            return base.GetHashCode();
         }
     }
 }

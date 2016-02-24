@@ -1,70 +1,98 @@
 ﻿using System;
 using System.Collections.Generic;
 using System.Linq;
+using System.Web;
 using System.Web.Mvc;
 using BattleSea.Models;
+using BattleSea.Models.Enums;
 
 namespace BattleSea.Controllers
 {
     public abstract class GameContext : Controller
     {
-        protected readonly Game Game;
-        protected readonly Guid PlayerId;
+        private const int DefaultBattlefieldSize = 10;
+        protected Game Game { get; private set; }
+        protected Player Player { get; private set; }
 
-        private static readonly ICollection<Game> Games;
+        private static readonly HashSet<Game> Games;
+        private static readonly HashSet<Player> Players;
+
+        protected int GamesCount => Games.Count;
+        protected int PlayersCount => Players.Count;
 
         static GameContext()
         {
-            Games = new List<Game>();
+            Games = new HashSet<Game>();
+            Players = new HashSet<Player>();
         }
 
-        protected GameContext()
+        protected GameContext(bool shouldCreatePlayer = false)
         {
-            if (System.Web.HttpContext.Current.Session["PlayerId"] == null)
+            IdentifyPlayer(shouldCreatePlayer);
+            IdentifyGame();
+        }
+
+        private void IdentifyGame()
+        {
+            var matchedGame = Games.FirstOrDefault(g => g.HasPlayer(Player.Id));
+            if (matchedGame != null) { Game = matchedGame; return; }
+
+            //lookup for games without first player
+            var game = Games.FirstOrDefault(g => !g.FirstPlayer.IsAvailable && g.State == GameState.Initialized);
+
+            if (game != null)
             {
-                if (Games.Any(g => !g.FirstPlayer.IsAvailable && !g.SecondPlayer.IsAvailable) || !Games.Any())
-                {
-                    Game = InitGame();
-                }
-
-                var gameWithoutFirstPlayer =
-                    Games.FirstOrDefault(g => !g.FirstPlayer.IsAvailable);
-
-                if (gameWithoutFirstPlayer != null)
-                {
-                    gameWithoutFirstPlayer.FirstPlayer.InitPlayer();
-                    PlayerId = gameWithoutFirstPlayer.FirstPlayer.Id;
-                    System.Web.HttpContext.Current.Session["PlayerId"] = gameWithoutFirstPlayer.FirstPlayer.Id;
-                    Game = gameWithoutFirstPlayer;
-                    return;
-                }
-
-                var gameWithoutSecondPlayer =
-                    Games.FirstOrDefault(g => !g.SecondPlayer.IsAvailable && g.FirstPlayer.IsAvailable);
-
-                if (gameWithoutSecondPlayer != null)
-                {
-                    gameWithoutSecondPlayer.SecondPlayer.InitPlayer();
-                    PlayerId = gameWithoutSecondPlayer.SecondPlayer.Id;
-                    System.Web.HttpContext.Current.Session["PlayerId"] = gameWithoutSecondPlayer.SecondPlayer.Id;
-                    Game = gameWithoutSecondPlayer;
-                }
+                Game = game;
+                Game.FirstPlayer = Player;
+                return;
             }
-            else
+
+            //lookup games without second player
+            game = Games.FirstOrDefault(g => !g.SecondPlayer.IsAvailable && g.State == GameState.Initialized);
+
+            if (game != null)
             {
-                PlayerId = (Guid)System.Web.HttpContext.Current.Session["PlayerId"];
-                Game = Games.First(g => g.FirstPlayer.Id == PlayerId || g.SecondPlayer.Id == PlayerId);
+                Game = game;
+                Game.SecondPlayer = Player;
+                return;
             }
+
+            //if no: create new game, attach as first player
+            Game = CreateGame();
+            Game.FirstPlayer = Player;
+        }
+
+        private void IdentifyPlayer(bool shouldCreatePlayer)
+        {
+            var urlReferer = System.Web.HttpContext.Current.Request.UrlReferrer;
+            if (urlReferer == null && shouldCreatePlayer)
+            {
+                CreateAndAddPlayer();
+                return;
+            }
+
+            var playerId = HttpUtility.ParseQueryString(System.Web.HttpContext.Current.Request.Url.Query)["playerId"] ??
+                           HttpUtility.ParseQueryString(System.Web.HttpContext.Current.Request.UrlReferrer.Query)["playerId"];
+
+            Player = Players.First(p => p.Id == Guid.Parse(playerId));
+        }
+
+        private void CreateAndAddPlayer()
+        {
+            var playerInstance = new Player(DefaultBattlefieldSize);
+            playerInstance.Initialize();
+            Players.Add(playerInstance);
+            Player = playerInstance;
         }
 
         protected void SetPlayerSignalRConnectionId(Guid connection)
         {
-            Game.GetPlayerById(PlayerId).RegisterSignalRConnection(connection);
+            Game.GetPlayerById(Player.Id).RegisterSignalRConnection(connection);
         }
 
-        private static Game InitGame()
+        private static Game CreateGame()
         {
-            var game = new Game(10);
+            var game = new Game(DefaultBattlefieldSize);
             Games.Add(game);
             return game;
         }

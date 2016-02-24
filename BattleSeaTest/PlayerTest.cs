@@ -15,7 +15,7 @@ namespace BattleSeaTest
             var player = new Player(10);
             Assert.IsTrue(player.Id == Guid.Empty);
 
-            player.InitPlayer();
+            player.Initialize();
             Assert.IsTrue(player.Id != Guid.Empty);
         }
 

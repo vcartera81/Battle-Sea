@@ -4,25 +4,48 @@ using BattleSea.Models.Exceptions;
 
 namespace BattleSea.Models
 {
-    public class Game
+    public class Game : IEquatable<Game>
     {
         public Guid Id { get; }
+        private Player _firstPlayer;
+        private Player _secondPlayer;
 
         public delegate void GameOverEventHandler(object sender, GameOverEventArgs e);
         public event GameOverEventHandler GameOver;
 
-        public Player FirstPlayer { get; }
-        public Player SecondPlayer { get; }
+        public Player FirstPlayer
+        {
+            get { return _firstPlayer; }
+            set
+            {
+                //try to unsubscribe
+                if (_firstPlayer?.BattleField != null)
+                    _firstPlayer.BattleField.Fired -= FirstPlayerOnFired;
+
+                if (value == null) return;
+                _firstPlayer = value; _firstPlayer.BattleField.Fired += FirstPlayerOnFired;
+            }
+        }
+
+        public Player SecondPlayer
+        {
+            get { return _secondPlayer; }
+            set
+            {
+                //try to unsubscribe
+                if (_secondPlayer?.BattleField != null)
+                    _secondPlayer.BattleField.Fired -= SecondPlayerOnFired;
+
+                if (value == null) return;
+                _secondPlayer = value; _secondPlayer.BattleField.Fired += SecondPlayerOnFired;
+            }
+        }
 
         public Game(int fieldSize)
         {
             Id = Guid.NewGuid();
             FirstPlayer = new Player(fieldSize);
             SecondPlayer = new Player(fieldSize);
-
-            //register event handlers
-            FirstPlayer.BattleField.Fired += FirstPlayerOnFired;
-            SecondPlayer.BattleField.Fired += SecondPlayerOnFired;
         }
 
         public GameState State { get; private set; }
@@ -51,6 +74,12 @@ namespace BattleSea.Models
                 return theOtherOne ? FirstPlayer : SecondPlayer;
 
             throw new ArgumentException("No player with provided ID was found in this game.");
+        }
+
+        public bool HasPlayer(Guid id)
+        {
+            return (FirstPlayer != null && FirstPlayer.Id == id && FirstPlayer.IsAvailable)
+                || (SecondPlayer != null && SecondPlayer.Id == id && SecondPlayer.IsAvailable);
         }
 
         #region Events Handlers
@@ -89,6 +118,16 @@ namespace BattleSea.Models
         }
 
         #endregion
+
+        public bool Equals(Game other)
+        {
+            return this.Id == other.Id;
+        }
+
+        public override int GetHashCode()
+        {
+            return base.GetHashCode();
+        }
     }
 
     public class GameOverEventArgs

@@ -13,8 +13,12 @@ namespace BattleSea.Controllers
         public GameController()
         {
             //subscribe to ship destroyed event
-            Game.FirstPlayer.BattleField.ShipDestroyed += FirstPlayerBattleFieldOnShipDestroyed;
-            Game.SecondPlayer.BattleField.ShipDestroyed += SecondPlayerBattleFieldOnShipDestroyed;
+            if (Game.FirstPlayer != null && Game.FirstPlayer.IsAvailable)
+                Game.FirstPlayer.BattleField.ShipDestroyed += FirstPlayerBattleFieldOnShipDestroyed;
+
+            if (Game.SecondPlayer != null && Game.SecondPlayer.IsAvailable)
+                Game.SecondPlayer.BattleField.ShipDestroyed += SecondPlayerBattleFieldOnShipDestroyed;
+
             Game.GameOver += OnGameOver;
         }
 
@@ -25,6 +29,8 @@ namespace BattleSea.Controllers
             if (id != Game.Id)
                 throw new Exception("Game not found");
 
+            ViewBag.NumberOfGames = GamesCount;
+            ViewBag.NumberOfPlayers = PlayersCount;
             return View(Game);
         }
 
@@ -34,10 +40,10 @@ namespace BattleSea.Controllers
             return Json(new GameViewModel
             {
                 State = Game.State,
-                PlayerId = PlayerId,
-                You = Game.GetPlayerById(PlayerId),
-                Opponent = Game.GetPlayerById(PlayerId, true).GetObfuscatedBattlefield(),
-                YourTurn = Game.TurnPlayerId == PlayerId
+                PlayerId = Player.Id,
+                You = Game.GetPlayerById(Player.Id),
+                Opponent = Game.GetPlayerById(Player.Id, true).GetObfuscatedBattlefield(),
+                YourTurn = Game.TurnPlayerId == Player.Id
             });
         }
 
@@ -45,15 +51,15 @@ namespace BattleSea.Controllers
         public void ShuffleShips()
         {
             if (Game.State == GameState.Initialized)
-                Game.GetPlayerById(PlayerId).BattleField.PlaceShipsRandomly();
+                Game.GetPlayerById(Player.Id).BattleField.PlaceShipsRandomly();
         }
 
         [HttpPost]
         public JsonResult Fire(Coordinate coordinate)
         {
-            var fireResult = Game.GetPlayerById(PlayerId, true).BattleField.Fire(coordinate);
+            var fireResult = Game.GetPlayerById(Player.Id, true).BattleField.Fire(coordinate);
 
-            var srConnections = Game.GetPlayerById(PlayerId, true).GetSignalRConnections();
+            var srConnections = Game.GetPlayerById(Player.Id, true).GetSignalRConnections();
             srConnections.ForEach(c => _hubContext
                 .Clients
                 .Client(c.ToString())
@@ -109,7 +115,7 @@ namespace BattleSea.Controllers
                 .ForEach(c => _hubContext.Clients.Client(c.ToString()).endGame(true));
 
             //notify player lose
-            Game.GetPlayerById(gameOverEventArgs.WinnerPlayer.Id, theOtherOne:true)
+            Game.GetPlayerById(gameOverEventArgs.WinnerPlayer.Id, theOtherOne: true)
                 .GetSignalRConnections()
                 .ForEach(c => _hubContext.Clients.Client(c.ToString()).endGame(false));
         }
@@ -122,8 +128,12 @@ namespace BattleSea.Controllers
         protected override void Dispose(bool disposing)
         {
             //unsubscribe from events
-            Game.FirstPlayer.BattleField.ShipDestroyed -= FirstPlayerBattleFieldOnShipDestroyed;
-            Game.SecondPlayer.BattleField.ShipDestroyed -= SecondPlayerBattleFieldOnShipDestroyed;
+            if (Game.FirstPlayer != null && Game.FirstPlayer.IsAvailable)
+                Game.FirstPlayer.BattleField.ShipDestroyed -= FirstPlayerBattleFieldOnShipDestroyed;
+
+            if (Game.SecondPlayer != null && Game.SecondPlayer.IsAvailable)
+                Game.SecondPlayer.BattleField.ShipDestroyed -= SecondPlayerBattleFieldOnShipDestroyed;
+
             Game.GameOver -= OnGameOver;
 
             base.Dispose(disposing);

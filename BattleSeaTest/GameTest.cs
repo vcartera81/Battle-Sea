@@ -13,13 +13,20 @@ namespace BattleSeaTest
         public void WillThrowExceptionIfTryToStartAGameWithoutOneOrBothPlayers()
         {
             var game = new Game(10);
+
+            var firstPlayer = new Player(10);
+            var secondPlayer = new Player(10);
+
+            game.FirstPlayer = firstPlayer;
+            game.SecondPlayer = secondPlayer;
+
             try
             {
                 game.Start();
             }
             catch (InvalidGameStateException)
             {
-                game.FirstPlayer.InitPlayer();
+                game.FirstPlayer.Initialize();
                 try
                 {
                     game.Start();
@@ -67,19 +74,48 @@ namespace BattleSeaTest
         {
             var game = BuildGame();
             game.FirstPlayer.BattleField.PlaceShip(new Ship(
-                ShipType.TwoDeck, 
-                ShipOrientation.Vertical, 
+                ShipType.TwoDeck,
+                ShipOrientation.Vertical,
                 new Coordinate('A', 1)));
 
             game.SecondPlayer.BattleField.Fire(new Coordinate('A', 1));
             Assert.AreEqual(Turn.SecondPlayer, game.Turn);
         }
 
+        [TestMethod]
+        public void WillReturnTrueIfTheresAPlayerWithRequestedIdAndFalseIfNot()
+        {
+            var game = new Game(10);
+            var player = new Player(10);
+            player.Initialize();
+            game.FirstPlayer = player;
+
+            Assert.IsTrue(game.HasPlayer(player.Id));
+            Assert.IsFalse(game.HasPlayer(Guid.NewGuid()));
+
+            var player2 = new Player(10);
+            player2.Initialize();
+            game.SecondPlayer = player2;
+
+            Assert.IsTrue(game.HasPlayer(player2.Id));
+            game.FirstPlayer = null;
+
+            Assert.IsTrue(game.HasPlayer(player2.Id));
+        }
+
         private static Game BuildGame()
         {
             var game = new Game(10);
-            game.FirstPlayer.InitPlayer();
-            game.SecondPlayer.InitPlayer();
+
+            var firstPlayer = new Player(10);
+            firstPlayer.Initialize();
+
+            var secondPlayer = new Player(10);
+            secondPlayer.Initialize();
+
+            game.FirstPlayer = firstPlayer;
+            game.SecondPlayer = secondPlayer;
+
             game.Start();
 
             return game;
